@@ -2,8 +2,8 @@
 
 % What does one need to replicate the paper?
 
-a) MatLab
-b) Dynare
+a) MatLab (tested on 2020b Update 5)
+b) Dynare (tested on 4.6.4)
 
 % Replication of Rupert and Sustek (2019) modified with
 % - Interest-rate-smoothing
