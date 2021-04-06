@@ -1,4 +1,4 @@
-%%%%%%%%% Amaral(2021): New-Keynesian Models with Defaultables Policy Assets in Zero-Net-Supply
+%%%%%%%%% Amaral(2021): New-Keynesian Models with Defaultable Policy Assets in Zero-Net-Supply
 
 clear all; clc;
 
