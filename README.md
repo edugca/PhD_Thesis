@@ -10,4 +10,4 @@ Welcome to my codes archive. Here, one can find replication material for my pape
 
 (2021) On the Mechanics of NK Models - Smoothing the Capital Controversy Out
 
-(2021) New-Keynesian Models with Defaultables Policy Assets in Zero-Net-Supply
+(2021) New-Keynesian Models with Defaultable Policy Assets in Zero-Net-Supply
