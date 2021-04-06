@@ -1,5 +1,5 @@
 %%%%%%%%% Amaral(2021): On the Mechanics of New-Keynesian Models: Smoothing the Capital Controversy Out
-%%%%%%%%% Replication of RUPERT AND SUSTEK (2019) with the addition of Interest-rate-smoothing
+%%%%%%%%% Replication of Rupert and Sustek (2019) with the addition of Interest-rate-smoothing
 
 var
     y   $y_t$ (long_name='Output')

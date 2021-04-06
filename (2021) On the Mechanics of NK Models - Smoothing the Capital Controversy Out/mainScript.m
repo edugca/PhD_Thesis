@@ -1,4 +1,5 @@
-%% Rupert and Sustek (2019)
+%%%%%%%%% Amaral(2021): On the Mechanics of New-Keynesian Models: Smoothing the Capital Controversy Out
+%%%%%%%%% Replication of Rupert and Sustek (2019) with the addition of Interest-rate-smoothing
 
 clear all; clc;
 
