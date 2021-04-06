@@ -2,7 +2,7 @@
 
 Welcome to my codes archive. Here, one can find replication material for my papers.
 
-Ph.D. Thesis at PUC-Rio (Pontifícia Universidade Católica do Rio de Janeiro)
+# Ph.D. Thesis at PUC-Rio (Pontifícia Universidade Católica do Rio de Janeiro)
 
 (2021) An Unpleasant Coincidence for Monetary Policy: Risky Assets and Fiscal Limits (soon)
 
