@@ -1,5 +1,10 @@
 % Amaral(2021): On the Mechanics of New-Keynesian Models: Smoothing the Capital Controversy Out
-%
+
+% What does one need to replicate the paper?
+
+a) MatLab
+b) Dynare
+
 % Replication of Rupert and Sustek (2019) modified with
 % - Interest-rate-smoothing
 % - Realistic capital-to-output ratio
