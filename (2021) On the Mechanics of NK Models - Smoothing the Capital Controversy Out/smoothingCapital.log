@@ -1,0 +1,79 @@
+Starting preprocessing of the model file ...
+WARNING: in the 'steady_state_model' block, variable 'kk_lag' is not assigned a value
+Substitution of endo lags >= 2: added 1 auxiliary variables and equations.
+Found 10 equation(s).
+Evaluating expressions...done
+Computing static model derivatives (order 1).
+Computing dynamic model derivatives (order 2).
+Processing outputs ...
+done
+Preprocessing completed.
+
+STEADY-STATE RESULTS:
+
+y                		 0
+c                		 0
+kk               		 0
+kk_lag           		 0
+nr               		 0
+r                		 0
+ppi              		 0
+g                		 0
+xxiM             		 0
+
+MODEL SUMMARY
+
+  Number of variables:         10
+  Number of stochastic shocks: 1
+  Number of state variables:   4
+  Number of jumpers:           4
+  Number of static variables:  2
+
+
+MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS
+Variables       eepsM
+eepsM        1.000000
+
+POLICY AND TRANSITION FUNCTIONS
+                                xxiM          kk_lag               y               c               r             ppi              nr
+kk(-1)                             0               0        0.153718        0.457049       -0.031411       -0.055230       -0.082845
+kk(-2)                             0        1.000000               0               0               0               0               0
+eepsM                       1.000000               0       -9.041793       -0.749162        0.051486       -0.576138        0.135793
+
+
+THEORETICAL MOMENTS
+VARIABLE         MEAN  STD. DEV.   VARIANCE
+xxiM           0.0000     1.0000     1.0000
+kk_lag         0.0000     4.1900    17.5560
+y              0.0000     9.0647    82.1689
+c              0.0000     2.0563     4.2286
+r              0.0000     0.1413     0.0200
+ppi            0.0000     0.6209     0.3855
+nr             0.0000     0.3727     0.1389
+
+
+
+MATRIX OF CORRELATIONS
+Variables      xxiM  kk_lag       y       c       r     ppi      nr
+xxiM         1.0000  0.0000 -0.9975 -0.3643  0.3643 -0.9279  0.3643
+kk_lag       0.0000  1.0000  0.0662  0.8673 -0.8673 -0.3471 -0.8673
+y           -0.9975  0.0662  1.0000  0.4296 -0.4296  0.8991 -0.4296
+c           -0.3643  0.8673  0.4296  1.0000 -1.0000 -0.0090 -1.0000
+r            0.3643 -0.8673 -0.4296 -1.0000  1.0000  0.0090  1.0000
+ppi         -0.9279 -0.3471  0.8991 -0.0090  0.0090  1.0000  0.0090
+nr           0.3643 -0.8673 -0.4296 -1.0000  1.0000  0.0090  1.0000
+
+
+
+COEFFICIENTS OF AUTOCORRELATION
+Order          1       2       3       4       5
+xxiM      0.0000  0.0000  0.0000  0.0000  0.0000
+kk_lag    0.9313  0.8673  0.8077  0.7522  0.7005
+y         0.0305  0.0284  0.0265  0.0247  0.0230
+c         0.9313  0.8673  0.8077  0.7522  0.7005
+r         0.9313  0.8673  0.8077  0.7522  0.7005
+ppi       0.0034  0.0031  0.0029  0.0027  0.0025
+nr        0.9313  0.8673  0.8077  0.7522  0.7005
+Total computing time : 0h00m01s
+Note: 1 warning(s) encountered in the preprocessor
+Note: warning(s) encountered in MATLAB/Octave code
