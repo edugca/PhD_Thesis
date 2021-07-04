@@ -9,4 +9,4 @@ b) RISE Toolbox for MatLab (https://github.com/jmaih/RISE_toolbox)
 
 1) Copy all files and subfolders in the Paper's folder in GitHub to a local folder in your computer
 2) In MatLab, open the file mainScript.m
-3) Run all the script in order
+3) Run all the script in order and following the instructions in there
