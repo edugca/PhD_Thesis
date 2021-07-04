@@ -7,6 +7,8 @@ pathData = 'C:\Users\Eduardo\OneDrive\MATLAB\My Thesis\Paper 7\Data';
 pathTables = 'C:\Users\Eduardo\OneDrive\MATLAB\My Thesis\Paper 7\Tables';
 pathImages = 'C:\Users\Eduardo\OneDrive\MATLAB\My Thesis\Paper 7\Images';
 
+addpath('Auxiliary Functions');
+
 dynare smoothingCapital;
 
 %% Sweep parameters
@@ -210,9 +212,9 @@ exportgraphics(f, [pathImages filesep 'Histogram.png']);
 tKY = table(dataset.year, dataset.country, dataset.rgdpna, dataset.rnna, dataset.rnna./(dataset.rgdpna./4), ...
     'VariableNames', {'Year', 'Country', 'Annual GDP', 'Capital Stock', '$\frac{\overline{K}}{\overline{Y}}$'});
 
-tKY.("Annual GDP") = arrayfun(@(c) ThousandSep(c, 'US\\$ %.2f', ','),tKY.("Annual GDP"),'UniformOutput',false);
-tKY.("Capital Stock") = arrayfun(@(c) ThousandSep(c, 'US\\$ %.2f', ','),tKY.("Capital Stock"),'UniformOutput',false);
-tKY.("$\frac{\overline{K}}{\overline{Y}}$") = arrayfun(@(c) ThousandSep(round(c, 1), '%.1f', ','), tKY.("$\frac{\overline{K}}{\overline{Y}}$"), 'UniformOutput',false);
+tKY.("Annual GDP") = arrayfun(@(c) pub_ThousandSep(c, 'US\\$ %.2f', ','),tKY.("Annual GDP"),'UniformOutput',false);
+tKY.("Capital Stock") = arrayfun(@(c) pub_ThousandSep(c, 'US\\$ %.2f', ','),tKY.("Capital Stock"),'UniformOutput',false);
+tKY.("$\frac{\overline{K}}{\overline{Y}}$") = arrayfun(@(c) pub_ThousandSep(round(c, 1), '%.1f', ','), tKY.("$\frac{\overline{K}}{\overline{Y}}$"), 'UniformOutput',false);
 
 idx = ( ismember(tKY.('Year'), [1960, 2019] ) ) ;
 idx = idx .* ( ismember(tKY.('Country'), {'Brazil', 'United States', 'Canada', 'United Kingdom', 'Germany', 'France', 'Japan', 'Mexico', 'South Africa', 'China'})) ;
