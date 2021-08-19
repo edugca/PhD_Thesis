@@ -18,8 +18,8 @@ paperNumber = 2;
 
 % Paths of the model
 if paperNumber == 2
-    pathMain    = edu_Path('/Users/Eduardo/OneDrive/MATLAB/Resources/Papers/(2021) An Unpleasant Coincidence for Monetary Policy - Risky Assets and Fiscal Limits', 'C:\');
-    pathData    = edu_Path('/Users/Eduardo/OneDrive/MATLAB/My Library/Database/Data/Brazil', 'C:\');
+    pathMain    = pub_Path('/Users/Eduardo/OneDrive/MATLAB/Resources/Papers/(2021) An Unpleasant Coincidence for Monetary Policy - Risky Assets and Fiscal Limits', 'C:\');
+    pathData    = pub_Path('/Users/Eduardo/OneDrive/MATLAB/My Library/Database/Data/Brazil', 'C:\');
 end
 pathTables  = [pathMain filesep 'Tables'];
 pathImages  = [pathMain filesep 'Images'];
@@ -280,7 +280,7 @@ solveOrder  = 1;
 solve_derivatives_type = 'symbolic'; % symbolic, automatic, numerical  %%% in case of optimal rule, cannot be symbolic
 debugMode   = false; % true, false
 steady_state_imposed = false;  % if imposed, then does not check whether it is a steady state (solves around the reference regime ss)
-steady_state_unique = false; % the steady state is unique: solves around the ergodic mean and does not run the steady state file
+steady_state_unique = false; % the steady state is unique: solves around the "ergodic mean" and does not run the steady state file
 solveModel;
 
 %% Goodness of fit of the logistic approximation
@@ -351,6 +351,8 @@ get(mdlVector(iMdl),'parameters')
 
 %% Filter and smooth calibrated model
 
+% Remember that one needs at least as many shocks as observables!
+
 % 1- filtered_variables refer to one-step ahead forecasts: a_{t|t-1}
 % 2- updated_variables refer to the updates a_{t|t}
 % 3- smoothed_variables refer to the final estimates conditional on all
@@ -364,6 +366,8 @@ get(mdlVector(iMdl),'parameters')
 %close all;
 
 mdlFilter = mdlVector; % mdlVector, estMdl
+
+saveGraphs = false;
 
 firstPlotPeriod = 5;
 plotObsAndSmoothed = true;
@@ -381,53 +385,40 @@ tlVector = {};
 for iMdl = 1:length(mdlFilter)
 
     % Select variables
-    obsVars             = {
-                            'obs_y', ...
-                            'obs_c', ...
-                            'obs_g', ...
+    % {'obs_name', 'varName', movAvgPer}   movAvgPer ex: 0 or [2,2]
+    allVars             = {
+                            'obs_y',                'y',    0; ...
+                            'obs_c',                'c',    0; ...
+                            'obs_g',                'g',    0; ...
                             ...%'obs_unempRate',...
-                            'obs_pii', ...
-                            ...%'obs_nr', ...
-                            'obs_swap_PreDI_3m', ...
-                            ...%'obs_r', ...
-                            ...%'obs_defLC', ...
-                            ...%'obs_debtOutput_new', ...
-                            ...%'obs_tau'
-                            };
-    filterSmoothVars    = {
-                            'y', ...
-                            'c', ...
-                            'g', ...
-                            ...%'n', ...
-                            'Pii', ...
-                            'nrPolicy', ...
-                            ...%'rPolicy', ...
-                            ...%'polDef', ...
-                            ...%'bY', ...
-                            ...%'tau' ...
-                            };   
-    movingAverageVars    = {
-                             0,
-                             0,
-                             0,
-                             0,
-                             0,
-                             0,
-                             ...%[2,2],
-                             ...%[2,2],
-                             ...%0,
-                             ...%0,
-                             ...%0
+                            'obs_pii',              'Pii',  0; ...
+                            ...'obs_nr', ...
+                            'obs_swap_PreDI_3m',    'nrPolicy',     0; ...
+                            ...'',                     'rPolicy',      0; ...
+                            ...'obs_defLC', 'polDef', 0;...
+                            ...'obs_debtOutput_new', 'bY', 0;...
+                            ...'obs_tau', 'tau', 0;
                             };
     
+    obsVars             = allVars(:,1);
+    filterSmoothVars    = allVars(:,2);
+    movingAverageVars   = allVars(:,3);
     vlocs               = locate_variables(filterSmoothVars, mdlFilter(iMdl).endogenous.name);
     vtexNames           = mdlFilter(iMdl).endogenous.tex_name(vlocs);
     plotVars            = filterSmoothVars;
     plotVarNames        = vtexNames;
 
     % Filter and smooth series
-    % IMPOSE REGIMES: filter(mdlFilter(iMdl), 'kf_user_algo', {@myKnownRegimesFilter, yRegimes}, 'data', data)
-    myFiltSmooth = filter(mdlFilter(iMdl), 'data', myData);
+    % yRegimes = ones(size(myData,1),1);
+    % IMPOSE REGIMES: filter(mdlFilter(iMdl), 'kf_user_algo', {@myKnownRegimesFilter, yRegimes}, 'data', myData)
+    if sum(mdlFilter(iMdl).markov_chains.chain_is_endogenous) == 0
+        myFiltSmooth = filter(mdlFilter(iMdl), 'data', myData);
+    else
+        yRegimes = ones(size(myData,1),1);
+        %myData2 = myData;
+        %myData2.data(:,end) = 0.045 + edu_Detrend(myData2('obs_swap_PreDI_3m').data, 'linear');
+        myFiltSmooth = filter(mdlFilter(iMdl), 'kf_user_algo', {@myKnownRegimesFilter, yRegimes}, 'data', myData);
+    end
 
     nCols = 2;
     nLins = ceil(length(plotVars) / nCols);
@@ -448,10 +439,30 @@ for iMdl = 1:length(mdlFilter)
 
         obsData             = myData(obsVars{iVar});
         obsData.varnames    = obsVars(iVar);
-        filtData      = myFiltSmooth.filtered_variables.(filterSmoothVars{iVar});
-        smoothData    = myFiltSmooth.smoothed_variables.(filterSmoothVars{iVar});
-        consolData    = [obsData, filtData, smoothData]; 
-
+        
+        if sum(mdlFilter(iMdl).markov_chains.chain_is_endogenous) == 0
+            filtData      = myFiltSmooth.filtered_variables.(filterSmoothVars{iVar});
+            smoothData    = myFiltSmooth.smoothed_variables.(filterSmoothVars{iVar});
+        else
+            filtData = myFiltSmooth.filtered_variables.(filterSmoothVars{iVar});
+            smoothData = myFiltSmooth.smoothed_variables.(filterSmoothVars{iVar});
+            
+            filtData.data = filtData.data(1:end-1,1);
+            smoothData.data = smoothData.data(:,1);
+            
+            filtData.varnames = {'filtered'};
+            smoothData.varnames = {'smoothed'};
+            
+%             filtData = NaN(size(dummySmoothData,1),1);
+%             smoothData = NaN(size(dummySmoothData,1),1);
+%             for iRow = 1:size(dummySmoothData,1)
+%                 filtData(iRow)      = dummyFiltData(iRow, yRegimes(iRow));
+%                 smoothData(iRow)    = dummySmoothData(iRow, yRegimes(iRow));
+%             end
+            
+        end
+        consolData    = [obsData, filtData, smoothData];
+        
         seriesRef = consolData;
         dates = (datetime(seriesRef.start, 'InputFormat', 'yyyyQQQ'):calquarters(1):datetime(seriesRef.finish, 'InputFormat', 'yyyyQQQ'))';
         [obsData, filtData, smoothData] = transformVariables(filterSmoothVars{iVar}, mapCalibParams{iMdl}, consolData.data(:,1), consolData.data(:,2), consolData.data(:,3));
@@ -550,8 +561,10 @@ for iMdl = 1:length(mdlFilter)
     end
 
     set(f, 'Position',  [100, 100, 800, 800]); % resize figure
-    exportgraphics(f, ...
-        strjoin({pathImages 'Filtered' modelName 'DefR' defProcess riskyPolicy  ['Graph - Filtered and Smoothed Shocks'  ' - DebtLevel ' debtLevel '.png']}, filesep));
+    if saveGraphs
+        exportgraphics(f, ...
+            strjoin({pathImages 'Filtered' ['Graph - Filtered and Smoothed Shocks'  ' - DebtLevel ' debtLevel '.png']}, filesep));
+    end
     edu_GraphSetInterpreter(previousInterpreter);
     
 end
@@ -766,7 +779,7 @@ disp(tRes);
 
 %% Steady state
 
-mdlVector.markov_chains.regimes
+mdlVector(1).markov_chains.regimes
 
 ssMatrix     = [];
 ssVarNames   = [];
@@ -1232,6 +1245,73 @@ paramValues     = { 1.0:0.2:2.0, 0:0.02:0.20, 0:0.1:1.0};
 stability_algorithm = 'cfm'; % 'cfm' or 'gmh'
 
 simulateWelfare;
+
+%% Simulate Interest Rates and Inflation
+
+polRule_simple = true;
+selectedShocksTurnOff = true;
+
+%%%%%%%%%%%%%% SET-UP MODELS
+mdlSimVector = mdlVector;
+for iMdl = 1:length(mdlSimVector)
+    paramsStructTemp = struct();
+    if polRule_simple
+        %paramsStructTemp.piiBar  = 0.011 ;
+        paramsStructTemp.phi_dY  = 0 ;
+        paramsStructTemp.phi_Y   = 0 ;
+        paramsStructTemp.phiNr   = 0 ;
+        paramsStructTemp.phi_Exp = 0 ;
+    end
+
+    % Turn off shocks
+    if selectedShocksTurnOff
+        paramsStructTemp.sigmaTau    = 0 ;
+        paramsStructTemp.sigmaBeta    = 0 ;
+        %paramsStructTemp.sigmaPolDef = 0 ;
+    end
+
+    mdlSimVector(iMdl)      = set(mdlSimVector(iMdl),'parameters', paramsStructTemp);
+    mdlSimVector(iMdl)      = solve(mdlSimVector(iMdl));
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+close all;
+
+% Initiate randomizer
+rng(1900)
+
+nSims                                   = 4;
+simul_regime                            = 1:nRegimes;
+simul_order                             = 1;
+simul_pruned                            = true;
+simul_honor_constraints                 = true; % true or false
+simul_honor_constraints_through_switch  = true; % true or false
+simul_anticipate_zero                   = true;
+simul_periods                           = 30000;
+simul_burn                              = 3000;
+simul_frwrd_back_shoot                  = false; % true or false
+simul_shock_uncertainty                 = true; % true or false
+
+% Load parameters / Simulate fiscal limit
+%loadParamsAndSimulFiscalLimits;
+
+% Override calibration parameters
+paramNamesOverride      = {'fracNR'};
+paramValuesOverride     = {0};
+
+% If param is switching, define as i.e. {{'phi_fisLim_1', 'phi_fisLim_2'}} to
+% match params in every iteration
+paramNames      = {'phi', 'phiNr', 'phi_Y'};
+paramRef        = {paramsStruct.phi, paramsStruct.gammaTau, paramsStruct.phi_Y};
+paramPlotNames  = {'\phi', '\phi^i', '\phi^Y'};
+paramTexPlotNames  = {'$\phi^{\pi}$', '$\phi^i$', '$\phi^Y$'};
+param1Ref = simStruct.params.(paramNames{1});
+param2Ref = simStruct.params.(paramNames{2});
+param3Ref = simStruct.params.(paramNames{3});
+paramValues     = { 1.0:0.25:3.0, 0.0:0.15:0.9, 0.0};
+stability_algorithm = 'cfm'; % 'cfm' or 'gmh'
+
+simulateNrPii;
 
 %% Simulate Correlation: inflation and default prob.
 
@@ -1989,7 +2069,7 @@ graphType = 'Welfare 2nd Order'; % 'Rules Comparison', 'Risk-Free vs Risky', 'We
 %%%%%%%%%%%
 
 histMdl = mdlSimVector;
-histVars = {'nrPolicy', 'Pii', 'bY', 'fisLim_1_2', 'y', 'c', 'cR', 'cNR', 'n', 'gY', 'tau', 'tax'};
+histVars = {'nrPolicy', 'Pii', 'bY', 'r1fisLim_1_2', 'y', 'c', 'cR', 'cNR', 'n', 'gY', 'tau', 'tax'};
 histTexVars = {'$i_t$', '$\Pi_t$', '$\frac{B_t}{Y_t}$', '$\mathcal{D}_t$', '$Y_t$', '$C_t$', '$C^R_t$', '$C^{NR}_t$', '$N_t$', '$\frac{G_t}{Y_t}$', '$\tau_t$', '$T_t$'};
 
 N = 4;
@@ -2116,6 +2196,7 @@ edu_GraphSetInterpreter(previousInterpreter);
 %%%%%%%%%%%%%%%%%%
 removeNegativeNrPolicy = true;
 graphType = 'Rules Comparison'; % 'Rules Comparison' or 'Risk-Free vs Risky'
+plotVerticalBars = [1,3];
 %%%%%%%%%%%%%%%%%%
 
 histMdl = mdlSimVector;
@@ -2127,8 +2208,6 @@ plotLineWidth = {1, 3, 1, 1};
 plotXLims = {[-5 45], [0 10]}; % [-5 45], [0 10]
 nLins = 1;
 nCols  = ceil(length(histVars)/nLins);
-
-plotVerticalBars = [1,3];
 
 fontSize = 12;
 
@@ -2515,7 +2594,7 @@ end
 
 set(f, 'Position',  [100, 0, 1200, nLins*250]); % resize figure
 exportgraphics(f, ...
-    strjoin({pathImages 'Welfare' title_stickyPrices ['Graph - ' title_graphType ' - Debt Level ' title_debtLevel ' - ' title_polRule_simple ' - ' title_approxPoint '.png']}, filesep));
+    strjoin({pathImages 'Welfare' title_stickyPrices ['Graph - ' title_graphType ' - ' title_polRule_simple ' - ' title_approxPoint '.png']}, filesep));
 edu_GraphSetInterpreter(previousInterpreter);
 
 %% Simulation: histogram of selected variables (regime-specific distribution)
@@ -2825,7 +2904,7 @@ end
 %% Simulation: PLOT tau_t vs. B_t
 
 %%%%% SPECIFY TIME RANGE TO PLOT
-rngPeriods = [1 200]; % use a wide range to find the regime-swicthing periods
+rngPeriods = [735 775]; % use a wide range to find the regime-swicthing periods
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 xlimRng = [1 (rngPeriods(2)-rngPeriods(1))];
@@ -2951,9 +3030,10 @@ for iMdl = mdl
     p(2).Color = plotColors{2};
     p(2).LineWidth = plotWidths{2};
     p(3).LineStyle = plotStyles{3};
-    p(3).Color = plotColors{3};
+    p(3).Color = 'black';
     p(3).LineWidth = plotWidths{3};
     ylabel('$\%$');
+    ylim([30 55]);
     hold on;
     yyaxis right;
     p2 = plot(y_bY(rngPeriods(1):rngPeriods(2), :));
@@ -3042,11 +3122,12 @@ for iMdl = mdl
     xlabel('time');
     ylabel('$\%$');
     xlim(xlimRng);
+    ylim([0, 100*max(y_defProb(rngPeriods(1):rngPeriods(2), :))]);
     set(gca, 'FontSize', fontSize);
     
 end
 
-set(f, 'Position',  [100, 300, 1000, 600]); % resize figure
+set(f, 'Position',  [100, 300, 800, 600]); % resize figure
 exportgraphics(f, ...
     strjoin({pathImages 'Laffer Curve' ['Graph - Simulated Laffer Curve.png']}, filesep));
 edu_GraphSetInterpreter(previousInterpreter);
@@ -3089,8 +3170,9 @@ disp(tCombs);
 %save('welfare.mat', 'meanData', 'varData', 'simMean', 'simVariance');
 
 %%%%%%%%%%%%%%%%%% CHECK
-idxStart    = max(1, find(y_regime == 3, 1) - 20);
-idxEnd      = min(length(y_regime), find(y_regime == 3, 1) + 20);
+idxStart    = max(1, find(y_regime == 2, 1) - 20);
+idxEnd      = min(length(y_regime), find(y_regime == 2, 1) + 20);
+disp(['Regime is binding at period ' num2str(find(y_regime == 2, 1))]);
 
 tData = [       (idxStart:idxEnd)', ...
                 y_regime(idxStart:idxEnd), ...
@@ -3114,11 +3196,71 @@ tSim = array2table(tData);
 tSim.Properties.VariableNames = {'Time', 'Regime', '$\tau^{sdw}$', '$\tau$', '$T_t$', '$B_t$', '$A_t$', '$Y_t$', '$\frac{B_t}{Y_t}$', '$i_t$', '$r_t$', 'i^{Gov}_t', '\Pi_t', '$\varepsilon^A_t$', '$\varepsilon^G_t$', '$\varepsilon^M_t$'};
 disp(tSim)
 
+%% Simulation: PLOT simulated nrPolicy vs. Pii
+
+mdl     = mdlVector;
+nLins   = 2;
+nCols   = 2;
+
+f = figure;
+oldInterpreter = edu_GraphSetInterpreter('latex');
+% Set layout and reduce empty spaces in the graph
+tl = tiledlayout(nLins, nCols);
+%tl.TileSpacing  = 'compact';
+%tl.Padding      = 'compact';
+
+previousInterpreter = edu_GraphSetInterpreter('latex');
+for iMdl = 1:length(mdl)
+    nexttile();
+    
+    y_nrPolicy  = [];
+    y_Pii       = [];
+    for iChain = 1:length(simRecord)
+        y_nrPolicy  = [y_nrPolicy; simRecord(iChain).('nrPolicy').data(:,iMdl)];
+        y_Pii       = [y_Pii; simRecord(iChain).('Pii').data(:,iMdl)];
+    end
+    %y_tauMax = get(mdlVector(iMdl),'parameters').tauMaxBar(1) .* ones(length(y_tau),1);
+    
+    y_Plot_nrPolicy  = randsample(y_nrPolicy, 10000);
+    y_Plot_Pii       = randsample(y_Pii, 10000);
+    p = scatter(y_Plot_Pii, y_Plot_nrPolicy, 1);
+    %p.LineWidth = 0.1;
+    %p.MarkerEdgeColor = 'b';
+    %p.MarkerFaceColor = [0 0.5 0.5];
+    %p(1).LineStyle = '-';
+    %p(1).Color = 'blue';
+    %p(1).LineWidth = 2;
+    %p(2).LineStyle = '--';
+    %p(2).Color = 'red';
+    %p(2).LineWidth = 2;
+    %legend('$\tau_t$', '$\tau^{exp}_t$', '$\tau^{max}_t$', 'Location', 'best');
+    xlabel('$\Pi_t$');
+    ylabel('$i_t$');
+    %ylim([  -0.02 + min(vec(yPlot)), ... 
+    %        +0.02 + max(vec(yPlot))]);
+    
+    hold on;
+    p = polyfit(y_Pii, y_nrPolicy, 1);
+    x1 = linspace(min(y_Pii), max(y_Pii), 100);
+    y1 = polyval(p, x1);    
+    plot(x1, y1, 'LineWidth', 3);
+    
+    hold on;
+    plot(mean(y_Pii), mean(y_nrPolicy), 'k.', 'markersize', 20)
+    
+    title(riseSetUpNames{iMdl});
+    set(gca, 'FontSize', 12);
+end
+linkaxes(tl.Children);
+
+edu_GraphSetInterpreter(previousInterpreter);
+set(f, 'Position',  [100, 300, 800, 600]); % resize figure
+
 %% Simulation: PLOT simulated Laffer Curve
 
 mdl     = mdlVector;
-nLins   = 1;
-nCols   = 1;
+nLins   = 2;
+nCols   = 2;
 
 f = figure;
 oldInterpreter = edu_GraphSetInterpreter('latex');
@@ -3127,10 +3269,10 @@ tl = tiledlayout(nLins, nCols);
 tl.TileSpacing  = 'compact';
 tl.Padding      = 'compact';
 
-nexttile();
 previousInterpreter = edu_GraphSetInterpreter('latex');
 for iMdl = 1:length(mdl)
-
+    nexttile();
+    
     y_tau       = [];
     y_tauMax    = [];
     y_tax       = [];
@@ -3142,7 +3284,9 @@ for iMdl = 1:length(mdl)
     end
     y_tauMax = get(mdlVector(iMdl),'parameters').tauMaxBar(1) .* ones(length(y_tau),1);
     
-    p = scatter(y_tau, y_tax);
+    y_Plot_tau  = randsample(y_tau, 10000);
+    y_Plot_tax  = randsample(y_tax, 10000);
+    p = scatter(y_Plot_tau, y_Plot_tax);
     p.LineWidth = 0.1;
     p.MarkerEdgeColor = 'b';
     p.MarkerFaceColor = [0 0.5 0.5];
@@ -3157,9 +3301,20 @@ for iMdl = 1:length(mdl)
     ylabel('$T_t$');
     %ylim([  -0.02 + min(vec(yPlot)), ... 
     %        +0.02 + max(vec(yPlot))]);
+    
+    hold on;
+    p = polyfit(y_tau, y_tax, 2);
+    x1 = linspace(0, max(y_tau), 100);
+    y1 = polyval(p, x1);    
+    plot(x1, y1, 'LineWidth', 3);
+    
+    title(riseSetUpNames{iMdl});
+    set(gca, 'FontSize', 12);
 end
-set(gca, 'FontSize', 16);
+linkaxes(tl.Children);
+
 edu_GraphSetInterpreter(previousInterpreter);
+set(f, 'Position',  [100, 300, 800, 600]); % resize figure
 
 %% Build specific IRFs
 

@@ -73,7 +73,7 @@ if m.user_data.conf_hasGovernment
     else
         % Default?
         ddelta = p.bindFis * p.deltaBar ;
-        %ddelta = deltaBar ;
+        %ddelta = p.deltaBar ;
     end
     
 else
@@ -117,9 +117,10 @@ rNa             = -1 + 1/(bbeta);
 rEF             = -1 + 1/(bbeta);
 
 %rPolicy         = -1 + 1 / ( (1 - p.bindFis) * bbeta +  ( p.bindFis*(1-p.deltaBar) ) * bbeta ) ;
-rPolicy         = -1 + 1 / ( (1 - probDefFisLim) * bbeta +  ( probDefFisLim*(1-p.deltaBar) ) * bbeta ) ;
+%rPolicy         = -1 + 1 / ( (1 - probDefFisLim) * bbeta +  ( probDefFisLim*(1-p.deltaBar) ) * bbeta ) ;
 
-Pii             = p.bindELB * ( (1+p.elbRate)/(1+rPolicy) ) + (1 - p.bindELB) * (1 + p.piiBar);
+%Pii             = p.bindELB * ( (1+p.elbRate)/(1+rPolicy) ) + (1 - p.bindELB) * (1 + p.piiBar);
+Pii             = 1 + p.piiBar;
 LAG_1_Pii       = Pii;
 LAG_2_Pii       = Pii;
 LAG_3_Pii       = Pii;
@@ -128,16 +129,6 @@ Pii_YoY         = Pii^4;
 LEAD_1_Pii_YoY  = Pii_YoY;
 LEAD_2_Pii_YoY  = Pii_YoY;
 LEAD_3_Pii_YoY  = Pii_YoY;
-
-if startsWith(m.user_data.conf_policyRule, "fixedIntercept_") || startsWith(m.user_data.conf_policyRule, "rRN_") || startsWith(m.user_data.conf_policyRule, "polDefAdjusted_")
-    iota = rPolicy;
-    nrPolicy    = - 1 + p.bindELB*(1+p.elbRate) + (1-p.bindELB) * ( (1 + iota) * Pii );
-    nrPolicyExp = - 1 + (1 + nrPolicy)^p.phiNr * ( (1 + iota) * (1 + p.piiBar) * (Pii / (1 + p.piiBar))^p.phi )^(1-p.phiNr);
-elseif startsWith(m.user_data.conf_policyRule, "rRF_") || startsWith(m.user_data.conf_policyRule, "rRNwithRiskFree_") || startsWith(m.user_data.conf_policyRule, "rEF_") || startsWith(m.user_data.conf_policyRule, "rNa_")
-    iota        = rRN ;
-    nrPolicy    = - 1 + p.bindELB*(1+p.elbRate) + (1-p.bindELB) * ( (1 + iota) * Pii );
-    nrPolicyExp = - 1 + (1 + nrPolicy)^p.phiNr * ( (1 + iota) * (1 + p.piiBar) * (Pii / (1 + p.piiBar))^p.phi )^(1-p.phiNr);
-end
 
 if endsWith(m.user_data.conf_policyRule, "_priceLevel")
     pLevel               = p.pLevelBar;
@@ -205,14 +196,14 @@ if m.user_data.conf_hasGovernment
         nrPolicyExp         = - 1 + (1 + nrPolicy)^p.phiNr * ( (1 + iota) * (1 + p.piiBar) * (Pii / (1 + p.piiBar))^p.phi )^(1-p.phiNr) ;
     elseif startsWith(m.user_data.conf_policyRule, "rRNwithRiskFree_")
         %rPolicy             = -1 + 1 / ( (1 - polDef) * p.beta +  ( polDef*(1-p.deltaBar) ) * p.beta ) ;
-        rPolicy             = -1 + 1 / p.beta ;
-        iota                = rRN ;
+        rPolicy             = rRN ;
+        iota                = rPolicy ;
         %nrPolicy            = (1 + rRN) * Pii - 1;
         nrPolicy            = - 1 + p.bindELB*(1+p.elbRate) + (1-p.bindELB) * ( (1 + rRN) * Pii );
         nrPolicyExp         = - 1 + (1 + nrPolicy)^p.phiNr * ( (1 + rRN) * (1 + p.piiBar) * (Pii / (1 + p.piiBar))^p.phi )^(1-p.phiNr) ;
     elseif startsWith(m.user_data.conf_policyRule, "rRF_")
-        rPolicy             = -1 + 1 / p.beta ;
-        iota                = rRN ;
+        rPolicy             = rRN ;
+        iota                = rPolicy ;
         %nrPolicy            = (1 + rRN) * Pii - 1;
         nrPolicy            = - 1 + p.bindELB*(1+p.elbRate) + (1-p.bindELB) * ( (1 + rRN) * Pii );
         nrPolicyExp         = - 1 + (1 + nrPolicy)^p.phiNr * ( (1 + rRN) * (1 + p.piiBar) * (Pii / (1 + p.piiBar))^p.phi )^(1-p.phiNr) ;
@@ -261,8 +252,11 @@ cNR             = (1-tau) * wp * n + z + newp.debtWedge ;
 cR              = 1/(1-p.fracNR) * (c - p.fracNR * cNR) ;
 
 % Natural
-nNa     = ( (p.thetaElast - 1)/p.thetaElast * (1-tau)/p.eta * kk * aTilde  )^(1/p.chi) ;
-cRNa    = 1/(1-p.fracNR) * ( ( (p.thetaElast - 1)/p.thetaElast * (1-tau)/p.eta )^(1/p.chi) * (kk*aTilde)^(1+1/p.chi) - g - p.fracNR*(( (p.thetaElast - 1)/p.thetaElast * 1/p.eta)^(1/p.chi) * ((1-tau)*kk*aTilde)^(1+1/p.chi) + z ) ) ;
+gNa     = g;
+kkNa    = kk;
+nNa     = ( (p.thetaElast - 1)/p.thetaElast * (1-tau)/p.eta * kkNa * aTilde  )^(1/p.chi) ;
+yNa     = ( (p.thetaElast - 1)/p.thetaElast * (1-tau)/p.eta )^(1/p.chi) * ( kkNa * aTilde )^(1 + 1/p.chi) ;
+cRNa    = 1/(1-p.fracNR) * ( ( (p.thetaElast - 1)/p.thetaElast * (1-tau)/p.eta )^(1/p.chi) * (kkNa*aTilde)^(1+1/p.chi) - gNa - p.fracNR*(( (p.thetaElast - 1)/p.thetaElast * 1/p.eta)^(1/p.chi) * ((1-tau)*kkNa*aTilde)^(1+1/p.chi) + z ) ) ;
 
 % Efficient
 nEF     = ( (1-tau)/p.eta * kk * aTilde  )^(1/p.chi) ;
@@ -341,7 +335,7 @@ nExp            = n;
 uCExp           = uC;
 gExp            = g;
 zExp            = z;
-taxExp          = p.tauBar;
+tauExp          = tau;
 taxExp          = tax;
 
 %% ESTIMATION VARIABLES

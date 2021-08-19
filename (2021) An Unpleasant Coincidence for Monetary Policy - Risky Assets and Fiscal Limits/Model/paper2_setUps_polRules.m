@@ -435,7 +435,7 @@ riseSetUpNames = [];
 % riseConfigVector(ii).conf_govExpenses = 'Zero'; % 'Actual', 'High', 'Zero'
 % riseConfigVector(ii).conf_govAccumDebt = false; % true, false
 
-%% GRAPH: Estimation
+%% GRAPH: Estimation (OLD)
 
 % ii = ii + 1;
 % riseModelNames{ii} = 'closedWithGovernment';
@@ -499,6 +499,50 @@ riseSetUpNames = [];
 % riseConfigVector(ii).conf_measurementErrors = false; % true, false    
 % riseConfigVector(ii).conf_debtLevel = 'Actual'; % 'Actual', 'High', 'Zero'
 % riseConfigVector(ii).conf_estimateModel = true;
+
+%% GRAPH: Estimation
+
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} \approx 0\%$: fixed';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - Fixed Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'None'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = true; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'fixedIntercept_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = true; % true, false    
+% riseConfigVector(ii).conf_debtLevel = 'Actual'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_defPolTarget = 0;
+% riseConfigVector(ii).conf_debtLevelGuess = 4;
+% riseConfigVector(ii).conf_estimateModel = true;
+% riseConfigVector(ii).conf_shocksTurnedOff = ["sigmaTau"];
+% riseConfigVector(ii).conf_simplifyPolicyRule = false;
+% riseConfigVector(ii).conf_stickyPrices = false;
+% riseConfigVector(ii).conf_monopolisticCompetition = false;
+
+ii = ii + 1;
+riseModelNames{ii} = 'closedWithGovernment';
+riseSetUpNames{ii} = '$\overline{\mathcal{D}} \approx 0\%$: $r^{RF}_t$';
+riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - Risky Natural Intercept';
+riseConfigVector(ii)                        = riseConfig;
+riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+riseConfigVector(ii).conf_hasGovernment     = true;
+riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+riseConfigVector(ii).conf_policyRule        = 'rRN_inflation';
+riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+riseConfigVector(ii).conf_measurementErrors = true; % true, false    
+riseConfigVector(ii).conf_debtLevel = 'Actual'; % 'Actual', 'High', 'Zero'
+riseConfigVector(ii).conf_defPolTarget = 0;
+riseConfigVector(ii).conf_debtLevelGuess = 4;
+riseConfigVector(ii).conf_estimateModel = true;
+riseConfigVector(ii).conf_shocksTurnedOff = ["sigmaTau"];
+riseConfigVector(ii).conf_simplifyPolicyRule = false;
+riseConfigVector(ii).conf_stickyPrices = true;
+riseConfigVector(ii).conf_monopolisticCompetition = true;
 
 %% GRAPH: Risk-free vs. Risky (Rule: target rN)
 
@@ -636,7 +680,7 @@ riseSetUpNames = [];
 % riseConfigVector(ii).conf_debtLevel = 'Actual'; % 'Actual', 'High', 'Zero'
 % riseConfigVector(ii).conf_estimateModel = false;
 % riseConfigVector(ii).conf_simplifyPolicyRule = true;
-
+% 
 % ii = ii + 1;
 % riseModelNames{ii} = 'closedWithGovernment';
 % riseSetUpNames{ii} = '$\overline{\mathcal{D}} \approx 0\%$: $r^{RF}_t$';
@@ -694,6 +738,22 @@ riseSetUpNames = [];
 % riseConfigVector(ii).conf_hasGovernment     = true;
 % riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
 % riseConfigVector(ii).conf_policyRule        = 'rRNwithRiskFree_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false
+% riseConfigVector(ii).conf_debtLevel = 'Actual'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
+
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} \approx 0\%$: $r^{n}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - Natural Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'rNa_inflation';
 % riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
 % riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
 % riseConfigVector(ii).conf_measurementErrors = false; % true, false
@@ -808,23 +868,23 @@ riseSetUpNames = [];
 % riseConfigVector(ii).conf_estimateModel = false;
 % riseConfigVector(ii).conf_simplifyPolicyRule = true;
 
-ii = ii + 1;
-riseModelNames{ii} = 'closedWithGovernment';
-riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 1\%$: $r^{RF}_t$';
-riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - Risky Natural Intercept';
-riseConfigVector(ii)                        = riseConfig;
-riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
-riseConfigVector(ii).conf_hasGovernment     = true;
-riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
-riseConfigVector(ii).conf_policyRule        = 'rRN_inflation';
-riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
-riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
-riseConfigVector(ii).conf_measurementErrors = false; % true, false    
-riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
-riseConfigVector(ii).conf_defPolTarget = 0.01;
-riseConfigVector(ii).conf_debtLevelGuess = 4.2;
-riseConfigVector(ii).conf_estimateModel = false;
-riseConfigVector(ii).conf_simplifyPolicyRule = true;
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 1\%$: $r^{RF}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - Risky Natural Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'rRN_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false    
+% riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_defPolTarget = 0.01;
+% riseConfigVector(ii).conf_debtLevelGuess = 4.2;
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
 % 
 % ii = ii + 1;
 % riseModelNames{ii} = 'closedWithGovernment';
@@ -935,7 +995,7 @@ riseConfigVector(ii).conf_simplifyPolicyRule = true;
 % riseConfigVector(ii).conf_debtLevelGuess = 4.2;
 % riseConfigVector(ii).conf_estimateModel = false;
 % riseConfigVector(ii).conf_simplifyPolicyRule = true;
-
+% 
 % ii = ii + 1;
 % riseModelNames{ii} = 'closedWithGovernment';
 % riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 2\%$: risk-free';
@@ -972,6 +1032,24 @@ riseConfigVector(ii).conf_simplifyPolicyRule = true;
 % riseConfigVector(ii).conf_estimateModel = false;
 % riseConfigVector(ii).conf_simplifyPolicyRule = true;
 
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 2\%$: $r^{n}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - Natural Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'rNa_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false    
+% riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_defPolTarget = 0.02;
+% riseConfigVector(ii).conf_debtLevelGuess = 4.2;
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
+
 %% GRAPH: Risky 4 Rules: 5% debt level
 
 % ii = ii + 1;
@@ -991,7 +1069,7 @@ riseConfigVector(ii).conf_simplifyPolicyRule = true;
 % riseConfigVector(ii).conf_debtLevelGuess = 4.5;
 % riseConfigVector(ii).conf_estimateModel = false;
 % riseConfigVector(ii).conf_simplifyPolicyRule = true;
-
+ 
 % ii = ii + 1;
 % riseModelNames{ii} = 'closedWithGovernment';
 % riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 5\%$: $r^{RF}_t$';
@@ -1027,7 +1105,7 @@ riseConfigVector(ii).conf_simplifyPolicyRule = true;
 % riseConfigVector(ii).conf_debtLevelGuess = 4.5;
 % riseConfigVector(ii).conf_estimateModel = false;
 % riseConfigVector(ii).conf_simplifyPolicyRule = true;
-
+% 
 % ii = ii + 1;
 % riseModelNames{ii} = 'closedWithGovernment';
 % riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 5\%$: risk-free';
@@ -1058,6 +1136,24 @@ riseConfigVector(ii).conf_simplifyPolicyRule = true;
 % riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
 % riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
 % riseConfigVector(ii).conf_measurementErrors = false; % true, false
+% riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_defPolTarget = 0.05;
+% riseConfigVector(ii).conf_debtLevelGuess = 4.5;
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
+% 
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 5\%$: $r^{n}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - Natural Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'rNa_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false    
 % riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
 % riseConfigVector(ii).conf_defPolTarget = 0.05;
 % riseConfigVector(ii).conf_debtLevelGuess = 4.5;
@@ -1235,6 +1331,174 @@ riseConfigVector(ii).conf_simplifyPolicyRule = true;
 % riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
 % riseConfigVector(ii).conf_defPolTarget = 0.05;
 % riseConfigVector(ii).conf_debtLevelGuess = 4.5;
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
+
+%% GRAPH: Welfare: Raising default risk
+
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} \approx 0\%$: adjusted by $\mathcal{D}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - PolDef Adjusted Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'polDefAdjusted_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false
+% riseConfigVector(ii).conf_debtLevel = 'Actual'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
+% 
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 1\%$: adjusted by $\mathcal{D}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - PolDef Adjusted Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'polDefAdjusted_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false
+% riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_defPolTarget = 0.01;
+% riseConfigVector(ii).conf_debtLevelGuess = 4.2;
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
+% 
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 2\%$: adjusted by $\mathcal{D}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - PolDef Adjusted Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'polDefAdjusted_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false
+% riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_defPolTarget = 0.02;
+% riseConfigVector(ii).conf_debtLevelGuess = 4.2;
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
+
+%% GRAPH: Welfare: Comparing rules at 2% default risk
+
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 2\%$: $r^{RF}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - Risky Natural Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'rRN_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false    
+% riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_defPolTarget = 0.02;
+% riseConfigVector(ii).conf_debtLevelGuess = 4.2;
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
+% 
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 2\%$: adjusted by $\mathcal{D}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - PolDef Adjusted Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'polDefAdjusted_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false
+% riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_defPolTarget = 0.02;
+% riseConfigVector(ii).conf_debtLevelGuess = 4.2;
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
+
+%% GRAPH: Welfare: Comparing rules at 5% default risk
+
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 5\%$: $r^{RF}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - Risky Natural Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'rRN_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false    
+% riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_defPolTarget = 0.05;
+% riseConfigVector(ii).conf_debtLevelGuess = 4.5;
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
+% 
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 5\%$: adjusted by $\mathcal{D}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - PolDef Adjusted Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'polDefAdjusted_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false
+% riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_defPolTarget = 0.05;
+% riseConfigVector(ii).conf_debtLevelGuess = 4.5;
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
+
+%% GRAPH: Welfare: Comparing rules at 7% default risk
+
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 7\%$: $r^{RF}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - Risky Natural Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'rRN_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false    
+% riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_defPolTarget = 0.07;
+% riseConfigVector(ii).conf_debtLevelGuess = 4.7;
+% riseConfigVector(ii).conf_estimateModel = false;
+% riseConfigVector(ii).conf_simplifyPolicyRule = true;
+% 
+% ii = ii + 1;
+% riseModelNames{ii} = 'closedWithGovernment';
+% riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 7\%$: adjusted by $\mathcal{D}_t$';
+% riseFullSetUpNames{ii} = 'Closed Economy - With Government - Productivity Single LogNormal - DefR Null - PolDef Adjusted Intercept';
+% riseConfigVector(ii)                        = riseConfig;
+% riseConfigVector(ii).conf_occBinConstraint  = 'FiscalLimit'; % 'None', 'FiscalLimit'
+% riseConfigVector(ii).conf_hasGovernment     = true;
+% riseConfigVector(ii).conf_govBondsAreRiskFree = false; % true, false
+% riseConfigVector(ii).conf_policyRule        = 'polDefAdjusted_inflation';
+% riseConfigVector(ii).conf_prodProcessType = 'Single_LogNormal'; % 'Single_LogNormal', 'Dual_LogNormal', 'MarkovSwitching'
+% riseConfigVector(ii).conf_defRProcessType = 'Null'; % 'Null', 'Fixed', 'LogNormal'
+% riseConfigVector(ii).conf_measurementErrors = false; % true, false
+% riseConfigVector(ii).conf_debtLevel = 'High'; % 'Actual', 'High', 'Zero'
+% riseConfigVector(ii).conf_defPolTarget = 0.07;
+% riseConfigVector(ii).conf_debtLevelGuess = 4.7;
 % riseConfigVector(ii).conf_estimateModel = false;
 % riseConfigVector(ii).conf_simplifyPolicyRule = true;
 
@@ -1633,33 +1897,34 @@ for iConfig = 1:ii
     if riseConfigVector(iConfig).conf_estimateModel || riseConfigVector(iConfig).conf_includeObservables
     
         riseConfigVector(iConfig).conf_observablesList = [
-                                ...%"obs_y", ...
+                                "obs_y", ...
                                 "obs_c", ...
-                                ...%"obs_pii", ...
-                                ...%"obs_g", ...
-                                ...%"obs_unempRate", ...
-                                ...%"obs_wage", ...
-                                ...%"obs_defLC", ...
-                                ...%"obs_tau", ...
-                                ...%"obs_debtOutput_new", ...
-                                ...%"obs_nr", ...
-                                ...%"obs_swap_PreDI_3m", ...
-                                ...%"obs_defLC", ...
-                                %"obs_y_FOCUS_20_EOQ", ...
-                                %"obs_y_FOCUS_80_EOQ", ...
+                                "obs_pii", ...
+                                "obs_g", ...
+                                ..."obs_unempRate", ...
+                                ..."obs_wage", ...
+                                ..."obs_defLC", ...
+                                ..."obs_tau", ...
+                                ..."obs_debtOutput_new", ...
+                                ..."obs_nr", ...
+                                "obs_swap_PreDI_3m", ...
+                                ..."obs_defLC", ...
+                                ..."obs_y_FOCUS_20_EOQ", ...
+                                ..."obs_y_FOCUS_80_EOQ", ...
                                 ];
         riseConfigVector(iConfig).conf_measurementErrorsList = [
-                                        ...%"obs_y", ...
+                                        "obs_y", ...
+                                        ...%"obs_c", ...
                                         ...%"obs_wage", ...
                                         ...%"obs_unempRate", ...
                                         ...%"obs_g", ...
-                                        ...%"obs_defLC", ...
+                                        ..."obs_defLC", ...
                                         ...%"obs_pii", ...
-                                        %"obs_swap_PreDI_6m"
-                                        %"obs_y_FOCUS_20_EOQ", ...
-                                        %"obs_y_FOCUS_80_EOQ", ...
-                                        %"obs_unempRate"
-                                        %"obs_pii_FOCUS_Median", ...
+                                        ..."obs_swap_PreDI_6m"
+                                        ..."obs_y_FOCUS_20_EOQ", ...
+                                        ..."obs_y_FOCUS_80_EOQ", ...
+                                        ..."obs_unempRate"
+                                        ..."obs_pii_FOCUS_Median", ...
                                         ];  
     else
     

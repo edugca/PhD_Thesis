@@ -88,9 +88,12 @@ endogenous
     cREF        "$C^{R,Eff}_t",
     rEF         "r^{Eff}_t",
 
-    nNa         "$N^{N}_t",
-    cRNa        "$C^{R,N}_t",
-    rNa         "r^{N}_t",
+    nNa         "$N^{n}_t",
+    yNa         "$Y^{n}_t",
+    cRNa        "$C^{R,n}_t",
+    rNa         "r^{n}_t",
+    kkNa        "K^{n}_t",
+    gNa         "G^{n}_t",
 
     tauSdw           "$\tau^{sdw}_{t}$",
 
@@ -509,39 +512,35 @@ model
 
             @#if conf_debtLevel == "Zero"
                 @#if ismember('sigmaTau', conf_shocksTurnedOff)
-                    %log(tau) = (1-bindTax)*(log(tauSS) + rhoTau*log(tau(-1)/tauSS) ) + bindTax*(log(tauMaxSS));
-                    log(tau) = (1-bindTax)*( log(tauSdw(-1)) ) + bindTax*(log(tauMaxSS));
+                    log(tau) = (1-bindTax)*(log(tauSS) + rhoTau*log(tau(-1)/tauSS) ) + bindTax*(log(tauMaxSS));
                 @#else
-                    %log(tau) = (1-bindTax)*(log(tauSS) + rhoTau*log(tau(-1)/tauSS) + sigmaTau*epsTau) + bindTax*(log(tauMaxSS));
-                    log(tau) = (1-bindTax)*( log(tauSdw(-1)) ) + bindTax*(log(tauMaxSS));
+                    log(tau) = (1-bindTax)*(log(tauSS) + rhoTau*log(tau(-1)/tauSS) + sigmaTau*epsTau) + bindTax*(log(tauMaxSS));
                 @#end
-                log(tauSdw) = log(tauSdwSS) + rhoTau*log(tauSdw(-1)/tauSdwSS) ;
             @#else
                 @#if ismember('sigmaTau', conf_shocksTurnedOff)
                     @#if conf_taxRule == "Relative"
-                        %log(tau) = (1-bindTax)*(log(tauSS) + rhoTau*log(tau(-1)/tauSS) + gammaTau*log(b(-1)/y(-1) * steady_state(y)/steady_state(b)) ) + bindTax*(log(tauMaxSS));
-                        log(tau) = (1-bindTax)*( log(tauSdw(-1)) ) + bindTax*(log(tauMaxSS));
+                        log(tau) = (1-bindTax)*(log(tauSS) + rhoTau*log(tau(-1)/tauSS) + gammaTau*log(b(-1)/y(-1) * ySS/bSS) ) + bindTax*(log(tauMaxSS));
+                        %log(tau) = (1-bindTax)*( log(tauSdw(-1)) ) + bindTax*(log(tauMaxSS));
                     @#elseif conf_taxRule == "Absolute"
-                        %log(tau) = (1-bindTax)*(log(tauSS) + rhoTau*log(tau(-1)/tauSS) + gammaTau*log(b(-1)/steady_state(b)) ) + bindTax*(log(tauMaxSS));
-                        log(tau) = (1-bindTax)*( log(tauSdw(-1)) ) + bindTax*(log(tauMaxSS));
+                        log(tau) = (1-bindTax)*(log(tauSS) + rhoTau*log(tau(-1)/tauSS) + gammaTau*log(b(-1)/bSS) ) + bindTax*(log(tauMaxSS));
+                        %log(tau) = (1-bindTax)*( log(tauSdw(-1)) ) + bindTax*(log(tauMaxSS));
                     @#end
                 @#else
                     @#if conf_taxRule == "Relative"
-                        %log(tau) = (1-bindTax)*(log(tauSS) + rhoTau*log(tau(-1)/tauSS) + gammaTau*log(b(-1)/y(-1) * steady_state(y)/steady_state(b)) + sigmaTau*epsTau) + bindTax*(log(tauMaxSS));
-                        log(tau) = (1-bindTax)*( log(tauSdw(-1)) + sigmaTau*epsTau ) + bindTax*(log(tauMaxSS));
+                        log(tau) = (1-bindTax)*(log(tauSS) + rhoTau*log(tau(-1)/tauSS) + gammaTau*log(b(-1)/y(-1) * ySS/bSS) + sigmaTau*epsTau) + bindTax*(log(tauMaxSS));
+                        %log(tau) = (1-bindTax)*( log(tauSdw(-1)) + sigmaTau*epsTau ) + bindTax*(log(tauMaxSS));
                     @#elseif conf_taxRule == "Absolute"
-                        %log(tau) = (1-bindTax)*(log(tauSS) + rhoTau*log(tau(-1)/tauSS) + gammaTau*log(b(-1)/steady_state(b)) + sigmaTau*epsTau) + bindTax*(log(tauMaxSS));
-                        log(tau) = (1-bindTax)*( log(tauSdw(-1)) + sigmaTau*epsTau ) + bindTax*(log(tauMaxSS));
+                        log(tau) = (1-bindTax)*(log(tauSS) + rhoTau*log(tau(-1)/tauSS) + gammaTau*log(b(-1)/bSS) + sigmaTau*epsTau) + bindTax*(log(tauMaxSS));
+                        %log(tau) = (1-bindTax)*( log(tauSdw(-1)) + sigmaTau*epsTau ) + bindTax*(log(tauMaxSS));
                     @#end
                 @#end
-            
-                @#if conf_taxRule == "Relative"
-                    %log(tauSdw) = log(tauSdwSS) + rhoTau*log(tauSdw(-1)/tauSdwSS) + gammaTau*log(b/y * steady_state(y)/steady_state(b)) ;
-                    log(tauSdw) = log(tauSdwSS) + rhoTau*log(tauSdw(-1)/tauSdwSS) + gammaTau*log(b/y * ySS/bSS) ;
-                @#elseif conf_taxRule == "Absolute"
-                    log(tauSdw) = log(tauSdwSS) + rhoTau*log(tauSdw(-1)/tauSdwSS) + gammaTau*log(b/bSS) ;
-                @#end
             @#end
+            @#if conf_taxRule == "Relative"
+                log(tauSdw) = log(tauSdwSS) + rhoTau*log(tauSdw(-1)/tauSdwSS) + gammaTau*log(b/y * ySS/bSS) ;
+            @#elseif conf_taxRule == "Absolute"
+                log(tauSdw) = log(tauSdwSS) + rhoTau*log(tauSdw(-1)/tauSdwSS) + gammaTau*log(b/bSS) ;
+            @#end
+        
 
              @#if conf_govBondsAreRiskFree
                 % Set fiscal limits to infinity
@@ -584,7 +583,6 @@ model
         @#else
             bLag1           = 0;
             tau             = 0;
-            tauSdw          = 0;
             %tauExp          = 0;
             ddelta           = 0;
             ddeltaExp        = 0;
@@ -612,10 +610,12 @@ model
         @#if conf_hasGovernment
             @#if conf_govExpenses == "Zero"
                 g       = rhoGG*g(-1) + rhoGY*log(y(-1)/ySS) + sigmaG*epsG;
+                gNa     = rhoGG*gNa(-1) + rhoGY*log(yNa(-1)/ySS) + sigmaG*epsG;
                 gExp    =  rhoGG*g + rhoGY*log(y/ySS);
             @#else
                 %[name='g process']
                 log(g/gSS)      = rhoGG*log(g(-1)/gSS) + rhoGY*log(y(-1)/ySS) + sigmaG*epsG;
+                log(gNa/gSS)    = rhoGG*log(gNa(-1)/gSS) + rhoGY*log(yNa(-1)/ySS) + sigmaG*epsG;
                 log(gExp/gSS)   = rhoGG*log(g/gSS) + rhoGY*log(y/ySS);
             @#end
             gY              = g/y;
@@ -625,11 +625,8 @@ model
 
             @#if conf_govAccumDebt
                 %[name='Debt']
-                %b       = (1 + nrGov) * ( (1 - bindFis * deltaBar) * b(-1)/Pii + g + z + debtWedge - tax);
-                % bindFis*(1-polDef(-1))*deltaBar
+                b       = (1 + nrGov) * ( (1-ddelta) * b(-1)/Pii + g + z + debtWedge - tax);
                 
-                b       =   (1-bindFis) * ( (1 + nrGov) * ( (1 - 0) * b(-1)/Pii + g + z + debtWedge - tax) )
-                            + bindFis * ( (1 + nrGov) * ( (1 - deltaBar) * b(-1)/Pii + g + z + debtWedge - tax) );
             @#else
                 %[name='Debt']
                 b       = 0;
@@ -639,6 +636,7 @@ model
             bY      = b/y;
         @#else
             g       = 0;
+            gNa     = 0;
             gY      = 0;
             %gExp    = 0;
             
@@ -700,16 +698,10 @@ model
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        %[name='Fisher equation']
-        %(1+nr) = (1+rRN)*Pii(+1);
-        @#if startsWith(conf_policyRule, "rRF_")
-            (1+nrPolicy) = (1+rRN)*Pii(+1);
-        @#else
-            (1+nrPolicy) = (1+rPolicy)*Pii(+1);
-        @#end
-        %(1+nrPolicy) = (1-polDef(+1))*(1+rPolicy)*Pii(+1) + polDef(+1)*(1+rPolicy)*(1-ddelta(+1))*Pii(+1);
-        
-        %[name='Nominal interest rate of government bond']
+        %[name='Fisher equation for the policy asset']
+        (1+nrPolicy) = (1+rPolicy)*Pii(+1);
+
+        %[name='Fisher equation for the government bond']
         (1+nrGov) = bindELB*(1 + elbRate) + (1-bindELB)*(1+rGov)*Pii(+1);
         
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -744,15 +736,18 @@ model
             rGov = rPolicy;
         @#end
 
-    % Natural real interest rate
+    % Flexible-price counterfactual
         %[name='Employment (natural)']
-        nNa = ( (thetaElast - 1)/thetaElast * (1-tau)/eta * kk * aTilde  )^(1/chi) ;
+        nNa = ( (thetaElast - 1)/thetaElast * (1-tau)/eta * kkNa * aTilde  )^(1/chi) ;
+
+        %[name='Output (natural)']
+        yNa = ( (thetaElast - 1)/thetaElast * (1-tau)/eta )^(1/chi) * ( kkNa * aTilde )^(1 + 1/chi) ;
 
         %[name='Ricardian consumption (natural)']
-        cRNa = 1/(1-fracNR) * ( ( (thetaElast - 1)/thetaElast * (1-tau)/eta )^(1/chi) * (kk*aTilde)^(1+1/chi) - g - fracNR*(( (thetaElast - 1)/thetaElast * 1/eta)^(1/chi) * ((1-tau)*kk*aTilde)^(1+1/chi) + z ) ) ;
+        cRNa = 1/(1-fracNR) * ( ( (thetaElast - 1)/thetaElast * (1-tau)/eta )^(1/chi) * (kkNa*aTilde)^(1+1/chi) - gNa - fracNR*(( (thetaElast - 1)/thetaElast * 1/eta)^(1/chi) * ((1-tau)*kkNa*aTilde)^(1+1/chi) + z ) ) ;
 
         %[name='Household Euler (risk-free and natural)']
-        1 / (1 + rNa) = bbeta * ( ( cRNa(+1) + alphaG*g(+1) - eta*nNa(+1)^(1+chi)/(1+chi) ) / ( cRNa + alphaG*g - eta*nNa^(1+chi)/(1+chi) ) )^(-sigma) * 1 ;
+        1 / (1 + rNa) = bbeta * ( ( cRNa(+1) + alphaG*gNa(+1) - eta*nNa(+1)^(1+chi)/(1+chi) ) / ( cRNa + alphaG*gNa - eta*nNa^(1+chi)/(1+chi) ) )^(-sigma) * 1 ;
 
     % Efficient real interest rate
         %[name='Employment (efficient)']
@@ -793,21 +788,27 @@ model
             @#if conf_hasGovernment
                 @#if conf_govExpenses == "Zero"
                     kk = kBar * (1 + g - gSS)^gammaGPSI;
+                    kkNa = kBar * (1 + gNa - gSS)^gammaGPSI;
                 @#else
                     kk = kBar * (g/gSS)^gammaGPSI;
+                    kkNa = kBar * (gNa/gSS)^gammaGPSI;
                 @#end
             @#else
                 kk = kBar ;
+                kkNa = kBar ;
             @#end
         @#else
             @#if conf_hasGovernment
                 @#if conf_govExpenses == "Zero"
                     kk = kk(-1) * (1 + g - gSS)^gammaGPSI + sigmaK * epsK;
+                    kkNa = kkNa(-1) * (1 + gNa - gSS)^gammaGPSI + sigmaK * epsK;
                 @#else
                     kk = kk(-1) * (g/gSS)^gammaGPSI + sigmaK * epsK;
+                    kkNa = kkNa(-1) * (gNa/gSS)^gammaGPSI + sigmaK * epsK;
                 @#end
             @#else
                 kk = kk(-1) + sigmaK * epsK;
+                kkNa = kkNa(-1) + sigmaK * epsK;
             @#end
         @#end
 
@@ -886,7 +887,7 @@ model
             @#elseif startsWith(conf_policyRule, "rEF_")
                 iota = rEF + (steady_state(rGov) - steady_state(rRN)) ;
             @#elseif startsWith(conf_policyRule, "rNa_")
-                iota = rNa + (steady_state(rGov) - steady_state(rRN)) ;
+                iota = rNa + (steady_state(rGov) - steady_state(rNa)) ;
             @#elseif startsWith(conf_policyRule, "polDefAdjusted_")
                 iota = rPolicy ;
              @#elseif startsWith(conf_policyRule, "rRNwithRiskFree_")
@@ -1112,8 +1113,8 @@ observables
 
 
 @#if conf_estimateModel && ~isempty(conf_observablesList)
-    %@#include "paper2_params_estimation_Bayesian.rs"
-    %@#include "paper2_params_estimation.rs"
+    @#include "paper2_params_estimation_Bayesian.rs"
+    %@#include "paper2_params_estimation_MLE.rs"
 @#end
 
 %%%%%% Specify the planner's objective

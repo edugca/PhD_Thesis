@@ -30,7 +30,7 @@ responseVar = 'inflation'; % 'inflation', 'expectedInflation'
 fontSize = 12;
 fontSize_title = 12;
 fontSize_labels = 10;
-fontSize_legend = 10;
+fontSize_legend = 12;
 
 % Countries to remove from the sample (i.e. outliers)
 remFromSample = {'TR'};
@@ -40,17 +40,17 @@ rulesTitles = {'No trend nor smoothing', 'Smoothing', 'Trend', 'Trend and smooth
 
 if strcmp(responseVar, 'inflation')
     rulesSpecs = {
-                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \phi\left(\pi_t - \overline{\pi} \right)$',
-                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi\left(\pi_t - \overline{\pi} \right)$',
-                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \phi\left(\pi_t - \overline{\pi} \right)$',
-                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi\left(\pi_t - \overline{\pi} \right)$'
+                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \phi^{\pi}\left(\pi_t - \overline{\pi} \right)$',
+                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi_t - \overline{\pi} \right)$',
+                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \phi^{\pi}\left(\pi_t - \overline{\pi} \right)$',
+                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi_t - \overline{\pi} \right)$'
                    };
 elseif strcmp(responseVar, 'expectedInflation')
     rulesSpecs = {
-                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \phi\left(\pi^e_t - \overline{\pi} \right)$',
-                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi\left(\pi^e_t - \overline{\pi} \right)$',
-                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \phi\left(\pi^e_t - \overline{\pi} \right)$',
-                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi\left(\pi^e_t - \overline{\pi} \right)$'
+                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \phi^{\pi}\left(\pi^e_t - \overline{\pi} \right)$',
+                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi^e_t - \overline{\pi} \right)$',
+                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \phi^{\pi}\left(\pi^e_t - \overline{\pi} \right)$',
+                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi^e_t - \overline{\pi} \right)$'
                    };
 end
 
@@ -148,13 +148,15 @@ for iRule = 1:length(rulesList)
     ls(2).DisplayName = 'Advanced best-fit';
     ls(1).DisplayName = 'Emerging best-fit';
     uistack(ls(1), 'top');
-    xlabel('$\phi$');
+    xlabel('$\phi^{\pi}$');
     ylabel('Inflation standard-deviation');
     set(gca, 'FontSize', fontSize);
     title([rulesTitles{iRule} newline rulesSpecs{iRule}], 'FontSize', fontSize_title);
     
     if iRule == 1
-        legend('FontSize', fontSize_legend, 'Location', 'best'); 
+        lg = legend('FontSize', fontSize_legend, 'Orientation', 'horizontal');
+        lg.Layout.Tile = 'north';
+        lg.Box = 'off';
     end
     
 end

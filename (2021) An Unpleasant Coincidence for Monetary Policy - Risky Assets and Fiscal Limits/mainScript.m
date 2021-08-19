@@ -3,11 +3,16 @@
 %% RUN THIS SECTION BEFORE RUNNING ANY OF THE OTHERS
 addpath(genpath('Auxiliary functions'));
 
+addpath('Motivation');
+addpath('Taylor Rule');
 addpath('Laffer Curve');
 addpath('Calibration');
 addpath('Fiscal Limits');
 addpath(genpath('Model'));
 addpath('Saved');
+
+%% Plot Figure 1
+motivation;
 
 %% Plot Figure 1
 lafferCurve;
@@ -21,6 +26,7 @@ lafferCurve;
 % In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solveOrder  = 1;
 % In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solve_derivatives_type = 'symbolic';
 % Run all sections until (including) section "Parameterize, solve the model, and assign the data (Policy Rules)"
+% In the section "Simulate the model", set simul_order = 1;
 % Run section "Simulate the model"
 % Run section "Simulation: PLOT tau_t vs. B_t"
 % If the graph plotted does not contain a period in which the peak of the Laffer curve binds, change the start and end periods in rngPeriods = [start end];
@@ -47,6 +53,17 @@ loadGovernmentExpenses;
 % dataset = GFSMAB_06-13-2020 16-01-20-13_timeSeries.csv
 distFiscalLimits;
 
+%% To estimate the model (Regime 1 only with flexible prices and perfect competition)
+
+% Open routine setUps_polRules
+% Uncomment the code in the section "GRAPH: Estimation"
+% Comment the code in other sections
+% Open mainScript_model
+% Run all sections until (including) section "Parameterize, solve the model, and assign the data (Policy Rules)"
+% Open routine estimateModel
+% Run sections in order until section "Estimating the model"
+% Run section "Do posterior simulation". It will take some/many hours!
+
 %% To reestimate the fiscal limits
 
 % To reestimate the fiscal limits, follow the instructions in the top
@@ -56,11 +73,13 @@ distFiscalLimits;
 
 % Open routine setUps_polRules
 % Uncomment the code in the section "GRAPH: ParamStability: Risky All Rules: Actual debt level"
-% Uncomment the code in the section "GRAPH: ParamStability: Risky All Rules: High debt level"
 % Comment the code in other sections
 % Open mainScript_model
 % Run all sections until (including) section "Parameterize, solve the model, and assign the data (Policy Rules)"
 % Run section "Test stability"
+
+% Repeat steps above but...
+% Uncomment instead the code in the section "GRAPH: ParamStability: Risky All Rules: High debt level"
 
 % It shall take a long time!
 
@@ -170,10 +189,10 @@ distFiscalLimits;
 % Run section "Simulate Correlation: default prob. and inflation"
 % It shall take a long time!
 
-%% Plot Figures 29 and 30
+%% Plot Figure 29
 
 % Open routine setUps_polRules
-% Uncomment the code in the section "GRAPH: Risky 4 Rules: Actual debt level"
+% Uncomment the code in the section "GRAPH: Welfare: Raising default risk"
 % Comment the code in other sections
 
 % Open mainScript_model
@@ -183,6 +202,21 @@ distFiscalLimits;
 % In the section "Simulate the model", set simul_order = 2;
 % Run section "Simulate the model"
 % Run section "Simulation: histogram of welfare variables (unconditional distribution)"
+
+%% Plot Figure 30
+
+% Open routine setUps_polRules
+% Uncomment the code in the section "GRAPH: Welfare: Comparing rules at 2% default risk"
+% Comment the code in other sections
+
+% Open mainScript_model
+% In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solveOrder  = 2;
+% In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solve_derivatives_type = 'automatic';
+% Run all sections until (including) section "Parameterize, solve the model, and assign the data (Policy Rules)"
+% In the section "Simulate the model", set simul_order = 2;
+% Run section "Simulate the model"
+% In the section "Simulation: histogram of selected variables (unconditional distribution)" set graphType = 'Welfare 2nd Order';
+% Run section "Simulation: histogram of selected variables (unconditional distribution)"
 
 %% Plot Tables 8 to 10 and 12 to 19
 
@@ -194,7 +228,6 @@ distFiscalLimits;
 % In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solveOrder  = 2;
 % In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solve_derivatives_type = 'automatic';
 % Run all sections until (including) section "Parameterize, solve the model, and assign the data (Policy Rules)"
-% In the section "Simulate the model", set simul_order = 2;
 % Run section "Simulate Welfare"
 
 % Open routine setUps_polRules
@@ -205,7 +238,6 @@ distFiscalLimits;
 % In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solveOrder  = 2;
 % In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solve_derivatives_type = 'automatic';
 % Run all sections until (including) section "Parameterize, solve the model, and assign the data (Policy Rules)"
-% In the section "Simulate the model", set simul_order = 2;
 % Run section "Simulate Welfare"
 
 % Open routine setUps_polRules
@@ -216,7 +248,6 @@ distFiscalLimits;
 % In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solveOrder  = 2;
 % In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solve_derivatives_type = 'automatic';
 % Run all sections until (including) section "Parameterize, solve the model, and assign the data (Policy Rules)"
-% In the section "Simulate the model", set simul_order = 2;
 % Run section "Simulate Welfare"
 
 % Open routine setUps_polRules
@@ -227,5 +258,4 @@ distFiscalLimits;
 % In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solveOrder  = 2;
 % In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solve_derivatives_type = 'automatic';
 % Run all sections until (including) section "Parameterize, solve the model, and assign the data (Policy Rules)"
-% In the section "Simulate the model", set simul_order = 2;
 % Run section "Simulate Welfare"

@@ -9,6 +9,7 @@ addpath('Model');
 addpath('Simulation');
 addpath('Empirical Correlations');
 addpath('Taylor Coefficient');
+addpath('Bias');
 
 %% Plot figures 1, 21, and 22
 rN_filters;

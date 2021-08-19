@@ -27,7 +27,7 @@ end
 
 %%%% Change the policyTargetRule to replicate the Paper's figures
 
-policyTargetRule = 'priceLevel'; % priceLevel, inflation
+policyTargetRule = 'inflation'; % priceLevel, inflation
 
 %%%%%%%%%%%%%%%%%%%%%%%
 
@@ -161,7 +161,11 @@ for iComb = 1:size(combList, 1)
             if iPhi == 1
                 title('$Corr \left( r^n_t, E_t\mathcal{D}^{Policy}_{t+1} \right)$', 'Interpreter', 'latex');
             end
-            ylabel({['$\phi = ' , phisToPlot{iPhi}, '$']; combNamesList{iComb, 2}});
+            if strcmp(policyTargetRule, 'priceLevel')
+                ylabel({['$\phi = ' , phisToPlot{iPhi}, '$']; combNamesList{iComb, 2}});
+            elseif strcmp(policyTargetRule, 'inflation')
+                ylabel({['$\phi^{\pi} = ' , phisToPlot{iPhi}, '$']; combNamesList{iComb, 2}});
+            end
             if iPhi == length(phisToPlot)
                 xlabel('$r^n_t$');
             end

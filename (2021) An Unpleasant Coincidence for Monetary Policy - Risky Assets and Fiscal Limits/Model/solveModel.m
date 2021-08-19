@@ -37,7 +37,7 @@ for iMdl=1:nMdl
     end
     
     % Load model
-     if conf_estimateModel == false
+     if riseConfig.conf_estimateModel == false
         mdlVector(iMdl) = rise(modelPath, ...
             'rise_flags', riseConfigVector(iMdl), ...
             ...%'solver', 'mfi', ...            % solvers={'mnk','fwz','mn','mfi'};
