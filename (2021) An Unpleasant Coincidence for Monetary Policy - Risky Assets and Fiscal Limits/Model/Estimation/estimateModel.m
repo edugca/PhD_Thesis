@@ -199,8 +199,8 @@ for iMdl = 1:length(listMdls)
     mdlPriorsUQ         = {estMdl(iMdl).estimation.priors.upper_quantile};
     mdlPriorsProb         = {estMdl(iMdl).estimation.priors.prior_prob};
     
-    tEstimation.(['Model_' num2str(iMdl)]) = cell2table(cell(nEstimParams, 8));
-    tEstimation.(['Model_' num2str(iMdl)]).Properties.VariableNames = {'Parameter', 'Prior Dist.', 'CI Min', 'CI Max', '\% CI', 'Post. Mode', 'Post. Mean', 'Post. Std.'};
+    tEstimation.(['Model_' num2str(iMdl)]) = cell2table(cell(nEstimParams, 10));
+    tEstimation.(['Model_' num2str(iMdl)]).Properties.VariableNames = {'Parameter', 'Prior Dist.', 'CI Min', 'CI Max', '\% CI', 'Post. Mode', 'Post. Mean', 'Post. Std.', 'Post. 5\%', 'Post. 95\%'};
     tEstimation.(['Model_' num2str(iMdl)]).Properties.RowNames      = mdlPriorsTexName';
     
     tEstimation.(['Model_' num2str(iMdl)]){:,'Parameter'}           = mdlPriorsTexName';
@@ -256,6 +256,10 @@ for iMdl = 1:length(listMdls)
         tEstimation.(['Model_' num2str(iMdl)]){iParam, 'Post. Mode'}   = {pStruct.post_mode_sim};
         tEstimation.(['Model_' num2str(iMdl)]){iParam, 'Post. Mean'}   = {pStruct.mean_sim};
         tEstimation.(['Model_' num2str(iMdl)]){iParam, 'Post. Std.'}   = {std(pStruct.x_kdens, pStruct.f_kdens)};
+        tEstimation.(['Model_' num2str(iMdl)]){iParam, 'Post. 5\%'}   = {pStruct.x_kdens(find(cumsum(pStruct.f_kdens)/sum(pStruct.f_kdens) >= 0.05, 1))};
+        tEstimation.(['Model_' num2str(iMdl)]){iParam, 'Post. 95\%'}   = {pStruct.x_kdens(find(cumsum(pStruct.f_kdens)/sum(pStruct.f_kdens) >= 0.95, 1))};
+        
+        pStruct.x_kdens(find(cumsum(pStruct.f_kdens)/sum(pStruct.f_kdens) >= 0.05, 1))
         
         % Format and save graph
         if mod(iParam, nLins*nCols) == 0 || iParam == nEstimParams
@@ -287,6 +291,8 @@ for iMdl = 1:length(listMdls)
     tEstimation.(['Model_' num2str(iMdl)]){:,'Post. Mode'} = cellfun(@(x) num2str(x,'%.3f'), tEstimation.(['Model_' num2str(iMdl)]){:,'Post. Mode'}, 'UniformOutput', false);
     tEstimation.(['Model_' num2str(iMdl)]){:,'Post. Mean'} = cellfun(@(x) num2str(x,'%.3f'), tEstimation.(['Model_' num2str(iMdl)]){:,'Post. Mean'}, 'UniformOutput', false);
     tEstimation.(['Model_' num2str(iMdl)]){:,'Post. Std.'} = cellfun(@(x) num2str(x,'%.3f'), tEstimation.(['Model_' num2str(iMdl)]){:,'Post. Std.'}, 'UniformOutput', false);
+    tEstimation.(['Model_' num2str(iMdl)]){:,'Post. 5\%'} = cellfun(@(x) num2str(x,'%.3f'), tEstimation.(['Model_' num2str(iMdl)]){:,'Post. 5\%'}, 'UniformOutput', false);
+    tEstimation.(['Model_' num2str(iMdl)]){:,'Post. 95\%'} = cellfun(@(x) num2str(x,'%.3f'), tEstimation.(['Model_' num2str(iMdl)]){:,'Post. 95\%'}, 'UniformOutput', false);
     
     % Sort rows
     tEstimation.(['Model_' num2str(iMdl)]) = tEstimation.(['Model_' num2str(iMdl)])(paramsOrder, :);
@@ -296,10 +302,10 @@ for iMdl = 1:length(listMdls)
     
     % Column names
     colNames = tEstimation.(['Model_' num2str(iMdl)]).Properties.VariableNames;
-    tabWidth = '1.0\\textwidth';
+    tabWidth = '1.3\\textwidth';
     pub_Table2Latex(tEstimation.(['Model_' num2str(iMdl)]), ...
         [pathTables filesep 'Estimation' filesep 'modelEstimation_Parameters_' num2str(iMdl) '.tex'], ...
-        'colAlignment', 'llccccccc', 'colNames', colNames, 'tabWidth', tabWidth);
+        'colAlignment', 'llcccccccc', 'colNames', colNames, 'tabWidth', tabWidth);
     
     % Display estimation table
     disp(tEstimation.(['Model_' num2str(iMdl)]));

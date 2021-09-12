@@ -41,6 +41,7 @@ iota            = nan(nPeriods + nFuture, nSimulations);
 nrGap           = nan(nPeriods + nFuture, nSimulations);
 defPol          = nan(nPeriods + nFuture, nSimulations);
 nrBad           = nan(nPeriods + nFuture, nSimulations);
+ddelta          = nan(nPeriods + nFuture, nSimulations);
 
 %% Run simulations
 
@@ -108,8 +109,8 @@ combList        = {    'p_Vec',     'defPol_Vec';
                        'pii_Vec',   'defPol_Vec'
                   };
         
-combNamesList   = {    '$\hat{p}_t$',     '$E_t \mathcal{D}^{Policy}_{t+1}$';
-                       '$\pi_t$',   '$E_t \mathcal{D}^{Policy}_{t+1}$'
+combNamesList   = {    '$\hat{p}_t$',     '$E_t \mathcal{D}_{t+1}$';
+                       '$\pi_t$',   '$E_t \mathcal{D}_{t+1}$'
                   };
 graphNamesList  = {    'P_defPol';
                        'pii_defPol'
@@ -159,7 +160,7 @@ for iComb = 1:size(combList, 1)
             leg = legend({'', [num2str(corrPearson,'%.2f'), ' (', char(num2str(pPearson, '%.2f')), ')']}, 'location', 'best');
 
             if iPhi == 1
-                title('$Corr \left( r^n_t, E_t\mathcal{D}^{Policy}_{t+1} \right)$', 'Interpreter', 'latex');
+                title('$Corr \left( r^n_t, E_t\mathcal{D}_{t+1} \right)$', 'Interpreter', 'latex');
             end
             if strcmp(policyTargetRule, 'priceLevel')
                 ylabel({['$\phi = ' , phisToPlot{iPhi}, '$']; combNamesList{iComb, 2}});

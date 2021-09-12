@@ -14,12 +14,13 @@ end
 
 %% Parameterization
 
+phi     = 1.0;
+
 nSumPeriods = 10;
 
 defLow  = 0.02;
 defMed  = 0.08;
 defHigh = 0.20;
-phi     = 1.0;
 rNRef   = 0.04;
 rNLow   = 0.03;
 rNHigh  = 0.05;

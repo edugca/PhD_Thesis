@@ -66,7 +66,7 @@ ssigmaM     = 1;
 ySS     = 1;
 kkSS    = 5.5; % 5.5 the closest
 qSS     = 1;
-kkappa  = 0.0; %capital adjustment costs
+kkappa  = 0; %capital adjustment costs
 
 model(linear);
 
@@ -111,9 +111,7 @@ end;
 steady;
 
 shocks;
-    var eepsM           = 1^2; //standard deviation of the monetary shock
-
-    %var eps_a, eps_star = 0.3*0.0071*0.0078; //covariance, constructed from correlation and standard deviations
+    var eepsM; stderr 0.01; //standard deviation of the monetary shock
 end;
 
 //generate LaTeX-files with equations and parameterization

@@ -74,7 +74,7 @@ for corrCoeff = [-1, -0.5, 0, 0.5, 1]
             if iSim == nSims
                 pub_GraphDrawZeroAxis(p);
                 set(gca,'FontSize',12); % Scale fontsize of axes
-                ylabel({['$\phi = ' , num2str(phi), '$']; '$E_t \mathcal{D}^{Policy}_{t+1}$'}, 'Interpreter', 'latex');
+                ylabel({['$\phi = ' , num2str(phi), '$']; '$E_t \mathcal{D}_{t+1}$'}, 'Interpreter', 'latex');
                 
                 if iPhi == 1
                     title("Scatter plot", 'Interpreter', 'latex')
@@ -113,7 +113,7 @@ for corrCoeff = [-1, -0.5, 0, 0.5, 1]
                 ylabel("Difference", 'Interpreter', 'latex');
                 
                 if iPhi == 1
-                    title("$\Upsilon^{Risky}_{t,j+1}\left(1 - E_t \mathcal{D}^{Policy}_{t+j+1}\right) - \Upsilon^{RF}_{t,j+1}$", 'Interpreter', 'latex')
+                    title("$\Upsilon^{Risky}_{t,j+1}\left(1 - E_t \mathcal{D}_{t+j+1}\right) - \Upsilon^{RF}_{t,j+1}$", 'Interpreter', 'latex')
                 elseif iPhi == 3
                     xlabel('term period', 'Interpreter', 'latex');
                 end

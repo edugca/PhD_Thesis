@@ -15,7 +15,6 @@ if optSymbolic
     if rrhoNr_val == 0
         assumeAlso(a2 == 0);
     else
-        assumeAlso(d0 > 0);
         assumeAlso(a2 < 0);
         assumeAlso(b2 < 0);
         assumeAlso(d2 < 0);

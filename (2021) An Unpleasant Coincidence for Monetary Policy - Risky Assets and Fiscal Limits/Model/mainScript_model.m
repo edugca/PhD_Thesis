@@ -85,6 +85,7 @@ end
 
 % Occasionally binding constraint (should rename this)
 conf_occBinConstraint = 'FiscalLimit'; % 'None', 'FiscalLimit'
+conf_regimeSwitching = 'Endogenous'; % 'Exogenous', 'Endogenous'
 
 % Effective lower bound
 conf_effectiveLowerBound = false;
@@ -182,6 +183,7 @@ conf_psiShockObservedWithDelay = false;
 riseConfig = struct( ...
         'conf_calibrationName',     conf_calibrationName, ...
         'conf_occBinConstraint',    conf_occBinConstraint, ...
+        'conf_regimeSwitching',     conf_regimeSwitching, ...
         'conf_hasGovernment',       conf_hasGovernment, ...
         'conf_govBondsAreRiskFree', conf_govBondsAreRiskFree, ...
         'conf_govExpenses',         conf_govExpenses, ...
@@ -752,6 +754,16 @@ end
 
 estimateModel;
 
+%% Estimation summary
+
+estimParamNames = fieldnames(estimPostSimData);
+for ii = 1:length(estimParamNames)
+    pStruct = estimPostSimData.(estimParamNames{ii});
+    disp( [ estimParamNames{ii} ' 5%  '  num2str(pStruct.x_kdens(find(cumsum(pStruct.f_kdens)/sum(pStruct.f_kdens) >= 0.05, 1))) ...
+            ' 95%  ' num2str(pStruct.x_kdens(find(cumsum(pStruct.f_kdens)/sum(pStruct.f_kdens) >= 0.95, 1)))
+        ]);
+end
+
 %% Print solution
 
 for iMdl = 1:nMdl
@@ -1296,8 +1308,8 @@ simul_shock_uncertainty                 = true; % true or false
 %loadParamsAndSimulFiscalLimits;
 
 % Override calibration parameters
-paramNamesOverride      = {'fracNR'};
-paramValuesOverride     = {0};
+paramNamesOverride      = {}; % ex: tfpLoss, deltaBar
+paramValuesOverride     = {}; % ex: 0
 
 % If param is switching, define as i.e. {{'phi_fisLim_1', 'phi_fisLim_2'}} to
 % match params in every iteration
@@ -1312,6 +1324,145 @@ paramValues     = { 1.0:0.25:3.0, 0.0:0.15:0.9, 0.0};
 stability_algorithm = 'cfm'; % 'cfm' or 'gmh'
 
 simulateNrPii;
+
+%% How to get the same simulation twice
+% Inspiration: https://github.com/jmaih/RISE_toolbox/issues/52
+
+nosimul=3000;
+mysims=simulate(mdlVector,'simul_honor_constraints',true,'simul_periods',nosimul,'simul_burn',0); %with 'simul_burn',0, mysims will include the steady state (i.e. all shocks are zero) in the first period
+
+db = initial_conditions(mdlVector, 1, 'steady', 1);
+
+% set initial conditions for shocks
+db.epsA(1, 1, 1:(nosimul+1))  = mysims.epsA.data;
+db.epsG(1, 1, 1:(nosimul+1))  = mysims.epsG.data;
+db.epsM(1, 1, 1:(nosimul+1))  = mysims.epsM.data;
+
+% specify active shocks
+shocks = {'epsA','epsG','epsM'};
+
+% set initial conditions for regime
+% create the field db.regime; by copying db.e_r to it it will have the right
+% character (ts); if the first step is omitted, db.regime will have the
+% character double and the next simulation does not run
+db.regime = db.epsA;
+db.regime(1, 1, 1:(nosimul+1)) = mysims.regime.data;
+
+% Note that due to the usage of "'simul_historical_data',db" and 
+% the definition of db as "db = initial_conditions(m, 1, 'steady', 1)" 
+% the value of all endogenous variables in the first period will be
+% its steady state value
+ mysims2=simulate(mdlVector,'simul_honor_constraints',true,'simul_historical_data',db,'simul_periods',nosimul,'forecast_cond_exo_vars',shocks,'simul_shock_uncertainty',false);
+
+ f = figure;
+ plot([mysims.c, mysims2.c]);
+ 
+ %% Calculate the Risky Steady State (Under Construction)
+% Inspiration: https://github.com/jmaih/RISE_toolbox/issues/52
+
+nSims                                   = 1;
+simul_regime                            = 1;
+simul_order                             = 1;
+simul_pruned                            = true;
+simul_honor_constraints                 = true; % true or false
+simul_honor_constraints_through_switch  = true; % true or false
+simul_anticipate_zero                   = true;
+simul_periods                           = 10000;
+simul_burn                              = 1000;
+simul_frwrd_back_shoot                  = false; % true or false
+simul_shock_uncertainty                 = true; % true or false
+
+
+db = initial_conditions(mdlVector, 1, 'steady', 1);
+
+% set initial conditions for shocks
+db.epsA(1, 1, 1:(simul_burn+1))  = 0;
+db.epsG(1, 1, 1:(simul_burn+1))  = 0;
+db.epsM(1, 1, 1:(simul_burn+1))  = 0;
+
+% specify active shocks
+shocks = {'epsA','epsG','epsM'};
+
+% set initial conditions for regime
+% create the field db.regime; by copying db.e_r to it it will have the right
+% character (ts); if the first step is omitted, db.regime will have the
+% character double and the next simulation does not run
+%db.regime = db.epsA;
+%db.regime(1, 1, 1:(simul_burn+1)) = regIdx;
+
+% Note that due to the usage of "'simul_historical_data',db" and 
+% the definition of db as "db = initial_conditions(m, 1, 'steady', 1)" 
+% the value of all endogenous variables in the first period will be
+% its steady state value
+simul_sig = 0;
+mysims_0 = simulate(mdlVector, ...
+                        'simul_order', 1, ...
+                        'simul_honor_constraints', false, ...
+                        'simul_historical_data', db, ...
+                        'simul_periods', simul_burn, ...
+                        'forecast_cond_exo_vars', shocks, ...
+                        'simul_shock_uncertainty', true, ...
+                        'simul_sig', simul_sig ...
+                        );
+
+mysims_1 = simulate(mdlVector, ...
+                        'simul_order', 1, ...
+                        'simul_honor_constraints', false, ...
+                        'simul_historical_data', db, ...
+                        'simul_periods', simul_burn, ...
+                        'forecast_cond_exo_vars', shocks, ...
+                        'simul_shock_uncertainty', true, ...
+                        'simul_anticipate_zero', true, ...
+                        'simul_honor_constraints_through_switch', true ...
+                        );
+
+mysims_2 = simulate(mdlVector, ...
+                        'simul_order', 2, ...
+                        'simul_honor_constraints', false, ...
+                        'simul_historical_data', db, ...
+                        'simul_periods', simul_burn, ...
+                        'forecast_cond_exo_vars', shocks, ...
+                        'simul_shock_uncertainty', true, ...
+                        'simul_anticipate_zero', true, ...
+                        'simul_honor_constraints_through_switch', true ...
+                        );
+
+mysims_3 = simulate(mdlVector, ...
+                        'simul_order', 3, ...
+                        'simul_honor_constraints', false, ...
+                        'simul_historical_data', db, ...
+                        'simul_periods', simul_burn, ...
+                        'forecast_cond_exo_vars', shocks, ...
+                        'simul_shock_uncertainty', true, ...
+                        'simul_anticipate_zero', true, ...
+                        'simul_honor_constraints_through_switch', true ...
+                        );                    
+                    
+%                         'simul_regime',             simul_regime, ...
+%                         'simul_order',              simul_order, ...
+%                         'simul_pruned',             simul_pruned, ...
+%                         'simul_honor_constraints',  simul_honor_constraints, ...
+%                         'simul_honor_constraints_through_switch', simul_honor_constraints_through_switch, ...
+%                         'simul_anticipate_zero',    simul_anticipate_zero, ...
+%                         'simul_periods',            simul_periods, ...
+%                         'simul_burn',               simul_burn, ...
+%                         'simul_frwrd_back_shoot',   simul_frwrd_back_shoot, ...
+%                         'simul_shock_uncertainty',  simul_shock_uncertainty ...                    
+                    
+f = figure;
+tl = tiledlayout(2,2);
+nexttile();
+plot(1:simul_burn+1, [mysims_0.c, mysims_1.c, mysims_2.c, mysims_3.c]);
+title('C');
+nexttile();
+plot(1:simul_burn+1, [mysims_0.rPolicy, mysims_1.rPolicy, mysims_2.rPolicy]);
+title('rPolicy');
+nexttile();
+plot(1:simul_burn+1, [mysims_0.nrPolicy, mysims_1.nrPolicy, mysims_2.nrPolicy]);
+title('nrPolicy');
+nexttile();
+plot(1:simul_burn+1, [mysims_0.Pii, mysims_1.Pii, mysims_2.Pii]);
+title('Pii');
 
 %% Simulate Correlation: inflation and default prob.
 

@@ -314,7 +314,9 @@ if hasGovernment
     rRN         = -1 + 1/(simStruct.params.beta);
     nr          = (1 + rRN) * (1+simStruct.params.piiBar) - 1;
 
-    if startsWith(policyRule, "fixedIntercept_") || startsWith(policyRule, "rRN_") || startsWith(policyRule, "rRF_")  || startsWith(policyRule, "rEF_")
+    if startsWith(policyRule, "fixedIntercept_") || startsWith(policyRule, "rRN_") ...
+            || startsWith(policyRule, "rRF_")  || startsWith(policyRule, "rEF_") ...
+            || startsWith(policyRule, "rNa_") || startsWith(policyRule, "rNaR_")
         iota        = rRN ;
         nrPolicy          = (1 + iota) * (1+simStruct.params.piiBar) - 1;
     elseif  startsWith(policyRule, "rRNwithRiskFree_")

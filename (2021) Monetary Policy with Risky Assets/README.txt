@@ -1,4 +1,4 @@
-% Amaral(2021): Monetary Policy with Risky Assets
+% Amaral(2021): Interest, Prices, and Risk
 
 % What does one need to replicate the paper?
 

@@ -4,12 +4,6 @@
 % Warning : this file is generated automatically by Dynare
 %           from model file (.mod)
 
-if isoctave || matlab_ver_less_than('8.6')
-    clear all
-else
-    clearvars -global
-    clear_persistent_variables(fileparts(which('dynare')), false)
-end
 tic0 = tic;
 % Define global variables.
 global M_ options_ oo_ estim_params_ bayestopt_ dataset_ dataset_info estimation_info ys0_ ex0_
@@ -240,14 +234,14 @@ M_.params(14) = 5.5;
 kkSS = M_.params(14);
 M_.params(15) = 1;
 qSS = M_.params(15);
-M_.params(12) = 0.0;
+M_.params(12) = 0;
 kkappa = M_.params(12);
 steady;
 %
 % SHOCKS instructions
 %
 M_.exo_det_length = 0;
-M_.Sigma_e(1, 1) = 1;
+M_.Sigma_e(1, 1) = (0.01)^2;
 write_latex_parameter_table;
 write_latex_definitions;
 options_.TeX = true;

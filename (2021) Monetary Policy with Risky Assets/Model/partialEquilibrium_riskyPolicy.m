@@ -16,8 +16,8 @@ policyTargetRule = 'inflation'; % priceLevel, inflation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-alpha       = 1/(1+phi);
-alphaPii    = 1/phiPii;
+%alpha       = 1/(1+phi);
+%alphaPii    = 1/phiPii;
 
 nPeriods        = 100;
 nFuture         = 100;

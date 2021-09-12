@@ -32,7 +32,7 @@ MODEL SUMMARY
 
 MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS
 Variables       eepsM
-eepsM        1.000000
+eepsM        0.000100
 
 POLICY AND TRANSITION FUNCTIONS
                                 xxiM          kk_lag               y               c               r             ppi              nr
@@ -43,13 +43,13 @@ eepsM                       1.000000               0       -9.041793       -0.74
 
 THEORETICAL MOMENTS
 VARIABLE         MEAN  STD. DEV.   VARIANCE
-xxiM           0.0000     1.0000     1.0000
-kk_lag         0.0000     4.1900    17.5560
-y              0.0000     9.0647    82.1689
-c              0.0000     2.0563     4.2286
-r              0.0000     0.1413     0.0200
-ppi            0.0000     0.6209     0.3855
-nr             0.0000     0.3727     0.1389
+xxiM           0.0000     0.0100     0.0001
+kk_lag         0.0000     0.0419     0.0018
+y              0.0000     0.0906     0.0082
+c              0.0000     0.0206     0.0004
+r              0.0000     0.0014     0.0000
+ppi            0.0000     0.0062     0.0000
+nr             0.0000     0.0037     0.0000
 
 
 
@@ -74,6 +74,5 @@ c         0.9313  0.8673  0.8077  0.7522  0.7005
 r         0.9313  0.8673  0.8077  0.7522  0.7005
 ppi       0.0034  0.0031  0.0029  0.0027  0.0025
 nr        0.9313  0.8673  0.8077  0.7522  0.7005
-Total computing time : 0h00m01s
+Total computing time : 0h00m00s
 Note: 1 warning(s) encountered in the preprocessor
-Note: warning(s) encountered in MATLAB/Octave code

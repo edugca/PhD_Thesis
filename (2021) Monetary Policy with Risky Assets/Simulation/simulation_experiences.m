@@ -11,6 +11,7 @@ for iSimul = 1:nSimulations
     iota(:, iSimul)      = 0;
     defPol(:, iSimul)    = max(0,0.03 + 0.02*shocks_2);
     nrBad(:, iSimul)     = -0.40;
+    ddelta(:, iSimul)     = 0.40;
 
     nrGap(:, iSimul) = 0;
     for ii=1:nPeriods
@@ -22,18 +23,18 @@ for iSimul = 1:nSimulations
                 gamma = 1;
                 
                 for k=1:(j-ii+1)
-                        gamma = gamma * 1/(1+(1-defPol(ii+k-1, iSimul))*phi);
+                        gamma = gamma * 1/(1+(1-defPol(ii+k-1, iSimul)*ddelta(ii+k-1, iSimul))*phi);
                 end
                 
-                nrGap(j, iSimul)   = gamma * (rN(j, iSimul) - (1-defPol(j, iSimul))*iota(j, iSimul) - defPol(j, iSimul)*nrBad(j, iSimul));
+                nrGap(j, iSimul)   = gamma * (rN(j, iSimul) - (1-defPol(j, iSimul)*ddelta(j, iSimul))*iota(j, iSimul) + defPol(j, iSimul)*ddelta(j, iSimul));
             elseif strcmp(policyTargetRule, 'inflation')
                 gammaPii = 1;
                 
                 for k=1:(j-ii+1)
-                        gammaPii = gammaPii * 1/((1-defPol(ii+k-1, iSimul))*phiPii);
+                        gammaPii = gammaPii * 1/((1-defPol(ii+k-1, iSimul)*ddelta(ii+k-1, iSimul))*phiPii);
                 end
                 
-                nrGap(j, iSimul)   = gammaPii * (rN(j, iSimul) - (1-defPol(j, iSimul))*iota(j, iSimul) - defPol(j, iSimul)*nrBad(j, iSimul));
+                nrGap(j, iSimul)   = gammaPii * (rN(j, iSimul) - (1-defPol(j, iSimul)*ddelta(j, iSimul))*iota(j, iSimul) + defPol(j, iSimul)*ddelta(j, iSimul));
             end
             
         end
@@ -72,7 +73,8 @@ for iSimul = 1:nSimulations
     iota(:, iSimul)       = rN(:, iSimul);
     defPol(:, iSimul)     = defPol(:, iSimul); % use the same sequence of shocks
     nrBad(:, iSimul)      = -0.40;
-
+    ddelta(:, iSimul)     = 0.40;
+    
     nrGap(:, iSimul) = 0;
     for ii=1:nPeriods
         for j=ii:(ii+nFuture)
@@ -83,18 +85,18 @@ for iSimul = 1:nSimulations
                 gamma = 1;
                 
                 for k=1:(j-ii+1)
-                        gamma = gamma * 1/(1+(1-defPol(ii+k-1, iSimul))*phi);
+                        gamma = gamma * 1/(1+(1-defPol(ii+k-1, iSimul)*ddelta(ii+k-1, iSimul))*phi);
                 end
                 
-                nrGap(j, iSimul)   = gamma * (rN(j, iSimul) - (1-defPol(j, iSimul))*iota(j, iSimul) - defPol(j, iSimul)*nrBad(j, iSimul));
+                nrGap(j, iSimul)   = gamma * (rN(j, iSimul) - (1-defPol(j, iSimul)*ddelta(j, iSimul))*iota(j, iSimul) + defPol(j, iSimul)*ddelta(j, iSimul));
             elseif strcmp(policyTargetRule, 'inflation')
                 gammaPii = 1;
                 
                 for k=1:(j-ii+1)
-                        gammaPii = gammaPii * 1/((1-defPol(ii+k-1, iSimul))*phiPii);
+                        gammaPii = gammaPii * 1/((1-defPol(ii+k-1, iSimul)*ddelta(ii+k-1, iSimul))*phiPii);
                 end
                 
-                nrGap(j, iSimul)   = gammaPii * (rN(j, iSimul) - (1-defPol(j, iSimul))*iota(j, iSimul) - defPol(j, iSimul)*nrBad(j, iSimul));
+                nrGap(j, iSimul)   = gammaPii * (rN(j, iSimul) - (1-defPol(j, iSimul)*ddelta(j, iSimul))*iota(j, iSimul) + defPol(j, iSimul)*ddelta(j, iSimul));
             end
             
         end
@@ -128,12 +130,13 @@ defPol_Vec(num2str(thisPhi))  = [defPol_Vec(num2str(thisPhi)), reshape(defPol(1:
 
 disp('rN and def are stochastic; Mon pol tracks rN adjusted to underlying default risk');
 iExp = iExp + 1;
-expNames = [expNames {'Intercept $E_t\mathcal{D}^{Policy}_{t+1}$-adjusted'}];
+expNames = [expNames {'Optimal intercept'}];
 for iSimul = 1:nSimulations
 
     rN(:, iSimul)        = rN(:, iSimul); % use the same sequence of shocks
     defPol(:, iSimul)    = defPol(:, iSimul); % use the same sequence of shocks
     nrBad(:, iSimul)      = -0.40;
+    ddelta(:, iSimul)     = 0.40;
     iota(:, iSimul)      = (rN(:,iSimul) - defPol(:,iSimul).*nrBad(:,iSimul)) ./ (1-defPol(:,iSimul));
 
     nrGap(:, iSimul) = 0;

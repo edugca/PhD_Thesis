@@ -5,6 +5,7 @@ addpath(genpath('Auxiliary functions'));
 
 addpath('Motivation');
 addpath('Taylor Rule');
+addpath('Comparison');
 addpath('Laffer Curve');
 addpath('Calibration');
 addpath('Fiscal Limits');

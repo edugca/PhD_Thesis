@@ -14,7 +14,7 @@ dynare smoothingCapital;
 %% Sweep parameters
 
 %%%%%%
-% The steady-state capital and depreciation must be changed in the script .mod
+% The capital adjustment cost must be changed in the script .mod
 %%%%%%
 
 params_names = {'rrhoM', 'rrhoNr', 'kkSS'};
@@ -70,6 +70,7 @@ end
 
 %% Build table of parameter sweep
 
+% Select here the index of the capital-to-output ratio
 idx = 1;
 kkSS = params_3(idx);
 
@@ -136,7 +137,7 @@ for iParam = 1:length(params_1)
 
                         for iVar = 1:length(varList)
                             nexttile();
-                            p = plot(oo_.irfs.([ varList{iVar} '_eepsM']));
+                            p = plot(oo_.irfs.([ varList{iVar} '_eepsM']) .* 100);
                             p.LineWidth = 1.5;
                             edu_GraphDrawZeroAxis(p);
                             title(varTexList{iVar});
@@ -144,7 +145,11 @@ for iParam = 1:length(params_1)
                             set(gca, 'FontSize', 12);
                             
                             if mod(iVar, nCols) == 1
-                               ylabel('\%'); 
+                                if iVar == 1
+                                    ylabel('p.p.'); 
+                                elseif iVar == 4
+                                    ylabel('\%'); 
+                                end
                             end
                         end
 
@@ -171,18 +176,41 @@ dataset = readtable([pathData filesep 'pwt100.xlsx'], 'Sheet', 'Data');
 
 y = dataset.rgdpna;
 k = dataset.rnna;
+kPPP = dataset.cn;
+kPPP_diff = [NaN; ( dataset.cn(2:end) - dataset.cn(1:end-1) ) ./4 ] ;
+kPPP_rate = [NaN; real( ( dataset.cn(2:end) ./ dataset.cn(1:end-1) ).^(1/4) ) - 1] .* 100 ;
+invPPP = dataset.cgdpo .* dataset.csh_i ./ 4 ; % divide by 4 because we want quarterly
+invPPP_diff = [NaN; ( dataset.cgdpo(2:end).*dataset.csh_i(2:end) - dataset.cgdpo(1:end-1).*dataset.csh_i(1:end-1) ) ./4 ] ; % raised by 1/4 because we want quarterly
+invPPP_rate = [NaN; ( real ( ( (dataset.cgdpo(2:end) .* dataset.csh_i(2:end)) ./ (dataset.cgdpo(1:end-1) .* dataset.csh_i(1:end-1)) ).^(1/4) ) ) - 1] .* 100 ; % raised by 1/4 because we want quarterly
+invK_PPP = invPPP ./ kPPP .* 100 ; % divide by 4 because we want quarterly
+
+costAdjFactor = invPPP ./ kPPP .* (invPPP_rate./kPPP_rate).^2 ;
+
+% ROBUSTNESS CHECKS
+%costAdjFactor_diff = invPPP ./ kPPP .* (invPPP_diff./kPPP_diff).^2 ;
+costAdjFactor_diff = (invPPP_diff./kPPP_diff).^2 ;
 
 kY = k ./ (y/4); % Capital to quarterly GDP
+costAdj = costAdjFactor(dataset.year ~= 1950); % Cost adjustment factor correction (remove first year!!)
+costAdj_diff = costAdjFactor_diff(dataset.year ~= 1950); % Cost adjustment factor correction (remove first year!!)
 
 % Find specific countries
 idx = strcmp(dataset.countrycode, 'USA');
 kY_USA = k(idx) ./ (y(idx)/4) ;
+costAdj_USA = costAdj(idx);
+costAdj_USA_diff = costAdj_diff(idx);
 idx = strcmp(dataset.countrycode, 'BRA');
 kY_BRA = k(idx) ./ (y(idx)/4) ;
+costAdj_BRA = costAdj(idx);
+costAdj_BRA_diff = costAdj_diff(idx);
 idx = strcmp(dataset.countrycode, 'DEU');
 kY_DEU = k(idx) ./ (y(idx)/4) ;
+costAdj_DEU = costAdj(idx);
+costAdj_DEU_diff = costAdj_diff(idx);
 idx = strcmp(dataset.countrycode, 'JPN');
 kY_JPN = k(idx) ./ (y(idx)/4) ;
+costAdj_JPN = costAdj(idx);
+costAdj_JPN_diff = costAdj_diff(idx);
 
 % Remove NaN
 kY = rmmissing(kY);
@@ -191,6 +219,19 @@ kY_BRA = rmmissing(kY_BRA);
 kY_DEU = rmmissing(kY_DEU);
 kY_JPN = rmmissing(kY_JPN);
 
+costAdj = rmmissing(costAdj);
+costAdj_USA = rmmissing(costAdj_USA);
+costAdj_BRA = rmmissing(costAdj_BRA);
+costAdj_DEU = rmmissing(costAdj_DEU);
+costAdj_JPN = rmmissing(costAdj_JPN);
+
+costAdj_diff_diff = rmmissing(costAdj_diff);
+costAdj_USA_diff = rmmissing(costAdj_USA_diff);
+costAdj_BRA_diff = rmmissing(costAdj_BRA_diff);
+costAdj_DEU_diff = rmmissing(costAdj_DEU_diff);
+costAdj_JPN_diff = rmmissing(costAdj_JPN_diff);
+
+%%%% Graph Capital-to-Output ratio
 f = figure;
 binLimits = [prctile(kY, 5) prctile(kY, 95)];
 p = histogram(kY, 'BinLimits', binLimits);
@@ -207,13 +248,49 @@ xl.LineWidth = 2;
 set(f, 'Position',  [100, 0, 600, 400]); % resize figure
 exportgraphics(f, [pathImages filesep 'Histogram.png']);
 
-% Build table
 
+%%%% Graph Cost Adjustment Correction Factor
+f = figure;
+binLimits = [prctile(costAdj, 5) prctile(costAdj, 95)];
+p = histogram(costAdj, 'BinLimits', binLimits);
+p.FaceAlpha = 0.4;
+edu_GraphSetInterpreter('latex');
+title('Histogram of $\Upsilon_t$');
+xlabel('$\Upsilon_t$');
+ylabel('frequency');
+set(gca, 'FontSize', 14);
+
+xl = xline(median(costAdj, 'omitnan'), '--r');
+xl.LineWidth = 2;
+
+set(f, 'Position',  [100, 0, 600, 400]); % resize figure
+exportgraphics(f, [pathImages filesep 'Histogram_CostAdj.png']);
+
+
+%%%% Graph Cost Adjustment Correction Factor (difference spec)
+f = figure;
+binLimits = [prctile(costAdj_diff, 5) prctile(costAdj_diff, 95)];
+p = histogram(costAdj_diff, 'BinLimits', binLimits);
+p.FaceAlpha = 0.4;
+edu_GraphSetInterpreter('latex');
+title('Histogram of $\Upsilon_t$');
+xlabel('$\Upsilon_t$');
+ylabel('frequency');
+set(gca, 'FontSize', 14);
+
+xl = xline(median(costAdj_diff, 'omitnan'), '--r');
+xl.LineWidth = 2;
+
+set(f, 'Position',  [100, 0, 600, 400]); % resize figure
+exportgraphics(f, [pathImages filesep 'Histogram_CostAdj_diff.png']);
+
+
+%%%%%%% Build Capital-to-Quarterly-Output Ratio Table
 tKY = table(dataset.year, dataset.country, dataset.rgdpna, dataset.rnna, dataset.rnna./(dataset.rgdpna./4), ...
     'VariableNames', {'Year', 'Country', 'Annual GDP', 'Capital Stock', '$\frac{\overline{K}}{\overline{Y}}$'});
 
-tKY.("Annual GDP") = arrayfun(@(c) pub_ThousandSep(c, 'US\\$ %.2f', ','),tKY.("Annual GDP"),'UniformOutput',false);
-tKY.("Capital Stock") = arrayfun(@(c) pub_ThousandSep(c, 'US\\$ %.2f', ','),tKY.("Capital Stock"),'UniformOutput',false);
+tKY.("Annual GDP") = arrayfun(@(c) pub_ThousandSep(c, 'US\\$ %.0f', ','),tKY.("Annual GDP"),'UniformOutput',false);
+tKY.("Capital Stock") = arrayfun(@(c) pub_ThousandSep(c, 'US\\$ %.0f', ','),tKY.("Capital Stock"),'UniformOutput',false);
 tKY.("$\frac{\overline{K}}{\overline{Y}}$") = arrayfun(@(c) pub_ThousandSep(round(c, 1), '%.1f', ','), tKY.("$\frac{\overline{K}}{\overline{Y}}$"), 'UniformOutput',false);
 
 idx = ( ismember(tKY.('Year'), [1960, 2019] ) ) ;
@@ -222,9 +299,30 @@ idx = idx .* ( ismember(tKY.('Country'), {'Brazil', 'United States', 'Canada', '
 tSelected = tKY(find(idx), :);
 
 n_col = size(tSelected,2);
-tabWidth     = '0.8\\textwidth';
+tabWidth     = '0.76\\textwidth';
 colAlignment = 'clrrr';
 edu_Table2Latex(tSelected, [pathTables filesep 'CapitalToOutput_SelectedCountries' '.tex'], ...
+    'tabWidth', tabWidth, 'colAlignment', colAlignment);
+
+
+%%%%%%% Build Capital and Investment Growth Ratio Table
+tCOST = table(dataset.year, dataset.country, invK_PPP, kPPP_rate, invPPP_rate, costAdjFactor, ...
+    'VariableNames', {'Year', 'Country', '$\frac{x_t}{k_{t+1}}$ (\%)', '$\Delta k_{t+1}$ (\%)', '$\Delta x_t$ (\%)', '$\Upsilon_t$'});
+
+tCOST.("$\frac{x_t}{k_{t+1}}$ (\%)") = arrayfun(@(c) pub_ThousandSep(c, '%.1f', ','),tCOST.("$\frac{x_t}{k_{t+1}}$ (\%)"),'UniformOutput',false);
+tCOST.("$\Delta k_{t+1}$ (\%)") = arrayfun(@(c) pub_ThousandSep(c, '%.1f', ','),tCOST.("$\Delta k_{t+1}$ (\%)"),'UniformOutput',false);
+tCOST.("$\Delta x_t$ (\%)") = arrayfun(@(c) pub_ThousandSep(c, '%.1f', ','),tCOST.("$\Delta x_t$ (\%)"),'UniformOutput',false);
+tCOST.("$\Upsilon_t$") = arrayfun(@(c) pub_ThousandSep(c, '%.2f', ','), tCOST.("$\Upsilon_t$"), 'UniformOutput',false);
+
+idx = ( ismember(tCOST.('Year'), [1960, 2019] ) ) ;
+idx = idx .* ( ismember(tCOST.('Country'), {'Brazil', 'United States', 'Canada', 'United Kingdom', 'Germany', 'France', 'Japan', 'Mexico', 'South Africa', 'China'})) ;
+
+tSelected = tCOST(find(idx), :);
+
+n_col = size(tSelected,2);
+tabWidth     = '0.72\\textwidth';
+colAlignment = 'clcccc';
+edu_Table2Latex(tSelected, [pathTables filesep 'CostAdjustmentCalibration_SelectedCountries' '.tex'], ...
     'tabWidth', tabWidth, 'colAlignment', colAlignment);
 
 %% Undetermined coefficients
@@ -443,6 +541,82 @@ solveUC_plotGraph;
 
 kkappa_val = 0.1;
 rrhoNr_val = 0.5;
+%rrhoM_val  = 0.0;
+%kkSS_val   = 5.5;
+
+kkappaLine_val      = kkappa_val*kkSS_val;
+rSS_val             = 1/bbeta_val - 1 + ddelta_val;
+cSS_val             = ySS_val - ddelta_val*kkSS_val;
+wSS_val             = cSS_val*(ySS_val/(kkSS_val^aalpha_val))^(eeta_val/(1-aalpha_val));
+cchiSS_val          = wSS_val/(1-aalpha_val)*(ySS_val/kkSS_val)^(aalpha_val/(1-aalpha_val));
+ppsi_val            = cchiSS_val*(1-ttheta_val)*(1-ttheta_val*bbeta_val)/ttheta_val;
+varVals = { 
+            aalpha      aalpha_val
+            bbeta       bbeta_val
+            ddelta      ddelta_val
+            eeta        eeta_val
+            ttheta      ttheta_val
+            ppsi        ppsi_val
+            
+            nnu         nnu_val
+            kkSS        kkSS_val
+            rSS         rSS_val
+            
+            kkappaLine  kkappaLine_val
+            cchiSS      cchiSS_val
+            ySS         ySS_val
+            cSS         cSS_val
+            
+            %rrhoM       rrhoM_val
+            rrhoNr       rrhoNr_val
+            };
+
+solveUC_plotGraph;
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%% WITH TINY ADJUSTMENT COSTS and WITH SMOOTHING
+
+kkappa_val = 0.001;
+rrhoNr_val = 0.5;
+%rrhoM_val  = 0.0;
+%kkSS_val   = 5.5;
+
+kkappaLine_val      = kkappa_val*kkSS_val;
+rSS_val             = 1/bbeta_val - 1 + ddelta_val;
+cSS_val             = ySS_val - ddelta_val*kkSS_val;
+wSS_val             = cSS_val*(ySS_val/(kkSS_val^aalpha_val))^(eeta_val/(1-aalpha_val));
+cchiSS_val          = wSS_val/(1-aalpha_val)*(ySS_val/kkSS_val)^(aalpha_val/(1-aalpha_val));
+ppsi_val            = cchiSS_val*(1-ttheta_val)*(1-ttheta_val*bbeta_val)/ttheta_val;
+varVals = { 
+            aalpha      aalpha_val
+            bbeta       bbeta_val
+            ddelta      ddelta_val
+            eeta        eeta_val
+            ttheta      ttheta_val
+            ppsi        ppsi_val
+            
+            nnu         nnu_val
+            kkSS        kkSS_val
+            rSS         rSS_val
+            
+            kkappaLine  kkappaLine_val
+            cchiSS      cchiSS_val
+            ySS         ySS_val
+            cSS         cSS_val
+            
+            %rrhoM       rrhoM_val
+            rrhoNr       rrhoNr_val
+            };
+
+solveUC_plotGraph;
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%% WITH TINY ADJUSTMENT COSTS and WITH MORE SMOOTHING
+
+kkappa_val = 0.03;
+rrhoNr_val = 0.75;
 %rrhoM_val  = 0.0;
 %kkSS_val   = 5.5;
 

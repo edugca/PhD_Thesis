@@ -92,6 +92,7 @@ endogenous
     yNa         "$Y^{n}_t",
     cRNa        "$C^{R,n}_t",
     rNa         "r^{n}_t",
+    rNaR        "r^{rn}_t",
     kkNa        "K^{n}_t",
     gNa         "G^{n}_t",
 
@@ -487,11 +488,19 @@ model
 
         % Endogenous switching probabilities
         @#if conf_occBinConstraint == "FiscalLimit"
-            % Default probabilities
-            ! r1fisLim_tp_1_2 = 1/(1 + exp( probDefFisLim_Param_0 + probDefFisLim_Param_B*(b - muFisLim) + probDefFisLim_Param_A*(aTildeExp-aTildeExpSS) + probDefFisLim_Param_G*(gExp-gSS) )) ;
-            %! r1fisLim_tp_2_1 = 1 - 1/(1 + exp( probDefFisLim_Param_0 + probDefFisLim_Param_B*(b - muFisLim) + probDefFisLim_Param_A*(aTildeExp-aTildeExpSS) + probDefFisLim_Param_G*(gExp-gSS) )) ;
-            ! r1fisLim_tp_2_1 = 1 ;
+            @#if conf_regimeSwitching == "Endogenous"
+                % Default probabilities
+                ! r1fisLim_tp_1_2 = 1/(1 + exp( probDefFisLim_Param_0 + probDefFisLim_Param_B*(b - muFisLim) + probDefFisLim_Param_A*(aTildeExp-aTildeExpSS) + probDefFisLim_Param_G*(gExp-gSS) )) ;
+                %! r1fisLim_tp_2_1 = 1 - 1/(1 + exp( probDefFisLim_Param_0 + probDefFisLim_Param_B*(b - muFisLim) + probDefFisLim_Param_A*(aTildeExp-aTildeExpSS) + probDefFisLim_Param_G*(gExp-gSS) )) ;
+                ! r1fisLim_tp_2_1 = 1 ;
+            @#elseif conf_regimeSwitching == "Exogenous"
+                % Default probabilities
+                ! r1fisLim_tp_1_2 = 1/(1 + exp( probDefFisLim_Param_0 + probDefFisLim_Param_B*(bSS - steady_state(muFisLim)) )) ;
+                %! r1fisLim_tp_2_1 = 1 - 1/(1 + exp( probDefFisLim_Param_0 + probDefFisLim_Param_B*(bSS - steady_state(muFisLim)) )) ;
+                ! r1fisLim_tp_2_1 = 1 ;
+            @#end
 
+            % Peak of the Laffer Curve
             ! r2taxLim_tp_1_2 = (tauSdw > 0.5) ; %0.5 is the maximum tax rate
             ! r2taxLim_tp_2_1 = (tauSdw < 0.5) ;
 
@@ -500,6 +509,7 @@ model
 
             % Check whether the government has defaulted
             %? bLag1 < drawnFisLim ;
+
         @#end
 
         @#if conf_effectiveLowerBound
@@ -749,6 +759,10 @@ model
         %[name='Household Euler (risk-free and natural)']
         1 / (1 + rNa) = bbeta * ( ( cRNa(+1) + alphaG*gNa(+1) - eta*nNa(+1)^(1+chi)/(1+chi) ) / ( cRNa + alphaG*gNa - eta*nNa^(1+chi)/(1+chi) ) )^(-sigma) * 1 ;
 
+        %[name='Household Euler (risky and natural)']
+        1 / (1 + rNaR) = (1 - probDefFisLim) * bbeta * ( ( cRNa(+1) + alphaG*gNa(+1) - eta*nNa(+1)^(1+chi)/(1+chi) ) / ( cRNa + alphaG*gNa - eta*nNa^(1+chi)/(1+chi) ) )^(-sigma) * 1 
+                             +  ( probDefFisLim*(1-deltaBar) ) * bbeta * ( ( cRNa(+1) + alphaG*gNa(+1) - eta*nNa(+1)^(1+chi)/(1+chi) ) / ( cRNa + alphaG*gNa - eta*nNa^(1+chi)/(1+chi) ) )^(-sigma) * 1 ;
+
     % Efficient real interest rate
         %[name='Employment (efficient)']
         nEF = ( (1-tau)/eta * kk * aTilde  )^(1/chi) ;
@@ -872,6 +886,8 @@ model
                 iota = rEF ;
             @#elseif startsWith(conf_policyRule, "rNa_")
                 iota = rNa ;
+            @#elseif startsWith(conf_policyRule, "rNaR_")
+                iota = rNaR ;
             @#elseif startsWith(conf_policyRule, "polDefAdjusted_")
                 iota = rPolicy ;
             @#elseif startsWith(conf_policyRule, "rRNwithRiskFree_")
@@ -888,6 +904,8 @@ model
                 iota = rEF + (steady_state(rGov) - steady_state(rRN)) ;
             @#elseif startsWith(conf_policyRule, "rNa_")
                 iota = rNa + (steady_state(rGov) - steady_state(rNa)) ;
+            @#elseif startsWith(conf_policyRule, "rNaR_")
+                iota = rNaR ;
             @#elseif startsWith(conf_policyRule, "polDefAdjusted_")
                 iota = rPolicy ;
              @#elseif startsWith(conf_policyRule, "rRNwithRiskFree_")

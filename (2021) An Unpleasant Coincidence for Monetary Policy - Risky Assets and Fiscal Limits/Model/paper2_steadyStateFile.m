@@ -187,7 +187,9 @@ if m.user_data.conf_hasGovernment
         iota                = rPolicy;
         nrPolicy            = - 1 + p.bindELB*(1+p.elbRate) + (1-p.bindELB) * ( (1 + iota) * Pii ) ;
         nrPolicyExp         = - 1 + (1 + nrPolicy)^p.phiNr * ( (1 + iota) * (1 + p.piiBar) * (Pii / (1 + p.piiBar))^p.phi )^(1-p.phiNr) ;
-    elseif startsWith(m.user_data.conf_policyRule, "fixedIntercept_") || startsWith(m.user_data.conf_policyRule, "rRN_") || startsWith(m.user_data.conf_policyRule, "rEF_") || startsWith(m.user_data.conf_policyRule, "rNa_")
+    elseif startsWith(m.user_data.conf_policyRule, "fixedIntercept_") || startsWith(m.user_data.conf_policyRule, "rRN_") ...
+            || startsWith(m.user_data.conf_policyRule, "rEF_") || startsWith(m.user_data.conf_policyRule, "rNa_") ...
+            || startsWith(m.user_data.conf_policyRule, "rNaR_")
         %rPolicy             = -1 + 1 / ( (1 - polDef) * p.beta +  ( polDef*(1-p.deltaBar) ) * p.beta ) ;
         rPolicy             = rGov ;
         iota                = rPolicy ;
@@ -243,7 +245,7 @@ end
 
 rGap        = rPolicy - rRN ;
 rGapIota    = iota - rRN ;
-
+rNaR        = rGov;
 
 %% REAL SECTOR (PART 2)
 

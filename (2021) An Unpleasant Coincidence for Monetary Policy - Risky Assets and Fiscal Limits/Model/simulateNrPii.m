@@ -53,11 +53,13 @@ for iMdl = 1:length(mdlSimVector)
         t_nrPolicy = array2table(round(simAllMdls{iMdl}.nrPolicy,nRound), 'VariableNames', varNames, 'RowNames', rowNames);
         t_rPolicy = array2table(round(simAllMdls{iMdl}.rPolicy,nRound), 'VariableNames', varNames, 'RowNames', rowNames);
         t_Pii = array2table(round(simAllMdls{iMdl}.Pii,nRound), 'VariableNames', varNames, 'RowNames', rowNames);
+        t_rNa = array2table(round(simAllMdls{iMdl}.rNa,nRound), 'VariableNames', varNames, 'RowNames', rowNames);
+        t_probDefFisLim = array2table(round(simAllMdls{iMdl}.probDefFisLim,nRound), 'VariableNames', varNames, 'RowNames', rowNames);
 
         simGraphName = ['Rates and Inflation - XXXXXX - ' mdlSimVector(iMdl).user_data.conf_policyRule ' - ' ...
             mdlSimVector(iMdl).user_data.conf_debtLevel ' - ' num2str(mdlSimVector(iMdl).user_data.conf_defPolTarget) ...
             ' - ' paramNames{3} '=' num2str(paramValues{3}(kParam)) ...
-            ' - ' pub_IIF(isempty(paramNamesOverride), '', [paramNamesOverride{1} '=' num2str(paramValuesOverride{1})]) ...
+            pub_IIF(isempty(paramNamesOverride), '', @() [' - ' paramNamesOverride{1} '=' num2str(paramValuesOverride{1})]) ...
             '.tex'];
 
 
@@ -76,6 +78,16 @@ for iMdl = 1:length(mdlSimVector)
         filePath = strjoin({pathTables 'Simulation' 'Rates and Inflation' title_stickyPrices simGraphName_Pii}, filesep);
         pub_Table2Latex(t_Pii(iParams,jParams), filePath, 'tabWidth', tabWidth, 'colAlignment', colAlignment);
     
+        % rNa
+        simGraphName_rNa = replace(simGraphName, 'XXXXXX', 'rNa');
+        filePath = strjoin({pathTables 'Simulation' 'Rates and Inflation' title_stickyPrices simGraphName_rNa}, filesep);
+        pub_Table2Latex(t_rNa(iParams,jParams), filePath, 'tabWidth', tabWidth, 'colAlignment', colAlignment);
+        
+        % rNa
+        simGraphName_probDefFisLim = replace(simGraphName, 'XXXXXX', 'probDefFisLim');
+        filePath = strjoin({pathTables 'Simulation' 'Rates and Inflation' title_stickyPrices simGraphName_probDefFisLim}, filesep);
+        pub_Table2Latex(t_probDefFisLim(iParams,jParams), filePath, 'tabWidth', tabWidth, 'colAlignment', colAlignment);
+        
     end
     
 end
