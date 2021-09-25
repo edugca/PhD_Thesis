@@ -880,6 +880,8 @@ model
                 iota = -1 + 1/beta ;
             @#elseif startsWith(conf_policyRule, "rRN_")
                 iota = rRN ;
+            @#elseif startsWith(conf_policyRule, "rRNWrong_")
+                iota = rRN ;
             @#elseif startsWith(conf_policyRule, "rRF_")
                 iota = rRN ;
             @#elseif startsWith(conf_policyRule, "rEF_")
@@ -898,6 +900,8 @@ model
                 iota = steady_state(rPolicy) ;
             @#elseif startsWith(conf_policyRule, "rRN_")
                 iota = rRN + (steady_state(rGov) - steady_state(rRN)) ;
+            @#elseif startsWith(conf_policyRule, "rRNWrong_")
+                iota = rRN ;
             @#elseif startsWith(conf_policyRule, "rRF_")
                 iota = rRN ;
             @#elseif startsWith(conf_policyRule, "rEF_")

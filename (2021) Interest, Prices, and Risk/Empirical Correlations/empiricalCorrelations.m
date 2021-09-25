@@ -24,6 +24,9 @@ ts_rStar  = load('Filters/Saved/rStar_workspace.mat');
 ts_CDS = pub_Database_CDS_Fetch('Bloomberg');
 ts_CDS.Properties.VariableNames = strcat('CDS_ ', ts_CDS.Properties.VariableNames);
 
+ts_LCCS = pub_Database_LCCS_Fetch();
+ts_LCCS.Properties.VariableNames = strcat('LCCS_ ', ts_LCCS.Properties.VariableNames);
+
 load('Data/isoCountryCodes.mat', 't_ISOCountryCodes');
 
 %% Save data
@@ -107,9 +110,10 @@ end
 cpiIdx = startsWith(ts_rStar.ts.Properties.VariableNames, 'CPI_').*(~endsWith(ts_rStar.ts.Properties.VariableNames, '_Forecast_1Y'));
 nrIdx = startsWith(ts_rStar.ts.Properties.VariableNames, 'NR_');
 tbIdx = startsWith(ts_rStar.ts.Properties.VariableNames, 'TB_');
+fxavgIdx = startsWith(ts_rStar.ts.Properties.VariableNames, 'FXAVG_');
 dateStart = datetime(2000, 1, 1);
 dateEnd = datetime(2019, 10, 1);
-ts_workData = ts_rStar.ts(dateStart:dateEnd,ts_rStar.ts.Properties.VariableNames(find(cpiIdx+nrIdx+tbIdx)));
+ts_workData = ts_rStar.ts(dateStart:dateEnd,ts_rStar.ts.Properties.VariableNames(find(cpiIdx + nrIdx + tbIdx + fxavgIdx)));
 
 % Risk premium
 tbIdx = find(startsWith(ts_workData.Properties.VariableNames, 'TB_'));
@@ -125,6 +129,11 @@ end
 ts_CDS_aux = retime(ts_CDS, ts_workData.Properties.RowTimes, 'mean');
 ts_CDS_aux.Variables = ts_CDS_aux.Variables ./ 100;
 ts_workData = synchronize(ts_workData, ts_CDS_aux);
+
+% LCCS (aggregate quarterly by mean)
+ts_LCCS_aux = retime(ts_LCCS, ts_workData.Properties.RowTimes, 'mean');
+ts_LCCS_aux.Variables = ts_LCCS_aux.Variables ./ 100;
+ts_workData = synchronize(ts_workData, ts_LCCS_aux);
 
 % Probability of Default in LC
 %ts_workData.defLC_BR = ts_workData.defLC * 100;
@@ -150,7 +159,8 @@ countryGroupConversions = {emerging_conversion, advanced_conversion};
 
 countryGroupMeasureInterestRate = {'NR', 'NR'};
 countryGroupMeasureInflation    = {'CPI', 'CPI'};
-countryGroupMeasureRisk         = {'CDS', 'SPREAD'};
+countryGroupMeasureRisk         = {'LCCS', 'LCCS'}; %SPREAD, CDS or LCCS
+countryGroupMeasureFX           = {'FXAVG', 'FXAVG'}; %FXAVG
 
 countriesSelectedPerGroup = {};
 
@@ -179,6 +189,7 @@ for iGroup = 1:length(countryGroupNames)
         codeNR = countryGroupMeasureInterestRate{iGroup};
         codePii = countryGroupMeasureInflation{iGroup};
         codeRisk = countryGroupMeasureRisk{iGroup};
+        codeFX = countryGroupMeasureFX{iGroup};
         
         check_NR  = ismember([codeNR '_' countryCode], allSeries);
         check_Pii = ismember([codePii '_' countryCode], allSeries);
@@ -252,9 +263,13 @@ for iGroup = 1:length(countryGroupNames)
         ts_workData.([codePii '_' cCode '_ABS1Q']) = ts_workData.([codePii '_' cCode]) - lagmatrix(ts_workData.([codePii '_' cCode]),1);
         ts_workData.([codePii '_' cCode '_4Q_ABS4Q']) = lagmatrix(ts_workData.([codePii '_' cCode]),-4) - ts_workData.([codePii '_' cCode]);
 
-        % CDS
+        % Risk
         ts_workData.([codeRisk '_' cCode '_ABS1Q']) = ts_workData.([codeRisk '_' cCode]) - lagmatrix(ts_workData.([codeRisk '_' cCode]),1);
         ts_workData.([codeRisk '_' cCode '_4Q_ABS4Q']) = lagmatrix(ts_workData.([codeRisk '_' cCode]),-4) - ts_workData.([codeRisk '_' cCode]);
+        
+        % FX
+        ts_workData.([codeFX '_' cCode '_ABS1Q']) = ts_workData.([codeFX '_' cCode]) - lagmatrix(ts_workData.([codeFX '_' cCode]),1);
+        ts_workData.([codeFX '_' cCode '_4Q_ABS4Q']) = lagmatrix(ts_workData.([codeFX '_' cCode]),-4) - ts_workData.([codeFX '_' cCode]);
         
         %%%%%%% NR vs. Pii
         iGraph = iGraph + 1;
@@ -385,6 +400,7 @@ for iGroup = 1:length(countryGroupNames)
     codeNR      = countryGroupMeasureInterestRate{iGroup};
     codePii     = countryGroupMeasureInflation{iGroup};
     codeRisk    = countryGroupMeasureRisk{iGroup};
+    codeFX      = countryGroupMeasureFX{iGroup};
     
     for iCountry = 1:length(countriesSelected)
         
@@ -392,9 +408,10 @@ for iGroup = 1:length(countryGroupNames)
         cCode = countriesSelected{iCountry};
         cName = tb_countries{strcmp(tb_countries.ISO2, cCode),1}{:};
 
-        nrData = ts_workData.([codeNR '_' cCode '_4Q_ABS4Q']);
+        nrData  = ts_workData.([codeNR '_' cCode '_4Q_ABS4Q']);
         cpiData = ts_workData.([codePii '_' cCode '_4Q_ABS4Q']);
         cdsData = ts_workData.([codeRisk '_' cCode '_4Q_ABS4Q']);
+        fxData  = ts_workData.([codeFX '_' cCode '_4Q_ABS4Q']);
 
         if removeOutliers
             [~, idxOutliers] = rmoutliers([nrData, cpiData, cdsData], removeOutliersMethod);
@@ -416,12 +433,12 @@ for iGroup = 1:length(countryGroupNames)
         data_cpi_cds    = [data_cpi_cds; ...
             rmmissing([repmat(iCountry,size(ts_workData,1),1), (1:size(ts_workData,1))', ...
             isIT, ...
-            cpiData, cdsData])];
+            cpiData, cdsData, fxData])];
 
     end
 
     % Plot
-    robustReg = 'off'; % 'on' or 'off'
+    robustReg = 'off'; % 'on' or 'off' (outliers are supposed to have been removed above)
 
     iGraph = iGraph + 1;
     subplot('position',pos(iGraph,:,1));
@@ -453,7 +470,7 @@ for iGroup = 1:length(countryGroupNames)
     sc2 = scatter(data_nr_cds(:,4), data_nr_cds(:,5), 'filled');
     title([countryGroupNames{iGroup} ' economies: 4-quarter change'], 'FontWeight', 'normal');
     xlabel('Policy rate (p.p.)');
-    ylabel('CDS (p.p.)');
+    ylabel([codeRisk ' (p.p.)']);
     hline = lsline();
     mdl_nr_cds = fitlm(get(sc2,'xdata')', get(sc2,'ydata')', ...
         'RobustOpts', robustReg, 'VarNames', {'nr','cpi'});
@@ -478,7 +495,7 @@ for iGroup = 1:length(countryGroupNames)
     sc3 = scatter(data_cpi_cds(:,4), data_cpi_cds(:,5), 'filled');
     title([countryGroupNames{iGroup} ' economies: 4-quarter change'], 'FontWeight', 'normal');
     xlabel('YoY CPI inflation (p.p.)');
-    ylabel('CDS (p.p.)');
+    ylabel([codeRisk ' (p.p.)']);
     hline = lsline();
     mdl_cpi_cds = fitlm(get(sc3,'xdata')', get(sc3,'ydata')', ...
         'RobustOpts', robustReg, 'VarNames', {'nr','cpi'});

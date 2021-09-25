@@ -5,6 +5,7 @@ simResults.rPolicy          = NaN(length(paramValues{1}), length(paramValues{2})
 simResults.Pii              = NaN(length(paramValues{1}), length(paramValues{2}));
 simResults.rNa              = NaN(length(paramValues{1}), length(paramValues{2}));
 simResults.probDefFisLim    = NaN(length(paramValues{1}), length(paramValues{2}));
+simResults.regime           = NaN(length(paramValues{1}), length(paramValues{2}));
 
 for iParam = 1:length(paramValues{1})
     for jParam = 1:length(paramValues{2})
@@ -49,18 +50,23 @@ for iParam = 1:length(paramValues{1})
                     data_Pii            = [simRecord(:).Pii];
                     data_rNa            = [simRecord(:).rNa];
                     data_probDefFisLim  = [simRecord(:).probDefFisLim];
+                    data_regime         = [simRecord(:).regime];
                  else
                      data_nrPolicy      = [simRecord.nrPolicy];
                      data_rPolicy       = [simRecord.rPolicy];
                      data_Pii           = [simRecord.Pii];
                      data_rNa           = [simRecord.rNa];
                      data_probDefFisLim = [simRecord.probDefFisLim];
+                     data_regime        = [simRecord.regime];
                  end
                  vec_nrPolicy       = vec(data_nrPolicy.data);
                  vec_rPolicy        = vec(data_rPolicy.data);
                  vec_Pii            = vec(data_Pii.data);
                  vec_rNa            = vec(data_rNa.data);
                  vec_probDefFisLim  = vec(data_probDefFisLim.data);
+                 
+                 vec_regime         = vec(data_regime.data);
+                 vec_regime         = ismember(vec_regime, regimesToCalculateMoments);
 
                  % Stable solution
                  % Sum welfare of Ricardian and non-Ricardian agents
@@ -71,12 +77,15 @@ for iParam = 1:length(paramValues{1})
                      simResults.Pii(iParam, jParam)             = NaN;
                      simResults.rNa(iParam, jParam)             = NaN;
                      simResults.probDefFisLim(iParam, jParam)   = NaN;
+                     simResults.regime(iParam, jParam)          = NaN;
                  else
-                    simResults.nrPolicy(iParam, jParam) = mean( ( (1 + vec_nrPolicy) .^ 4 - 1 ) .* 100 );
-                    simResults.rPolicy(iParam, jParam) = mean( ( (1 + vec_rPolicy) .^ 4 - 1 ) .* 100 );
-                    simResults.Pii(iParam, jParam) = mean( ( vec_Pii .^ 4 - 1 ) .* 100 );
-                    simResults.rNa(iParam, jParam) = mean( ( (1 + vec_rNa) .^ 4 - 1 ) .* 100 );
-                    simResults.probDefFisLim(iParam, jParam) = mean( vec_probDefFisLim .* 100 );
+                    simResults.nrPolicy(iParam, jParam) = mean( ( (1 + vec_nrPolicy(vec_regime)) .^ 4 - 1 ) .* 100 );
+                    simResults.rPolicy(iParam, jParam) = mean( ( (1 + vec_rPolicy(vec_regime)) .^ 4 - 1 ) .* 100 );
+                    simResults.Pii(iParam, jParam) = mean( ( vec_Pii(vec_regime) .^ 4 - 1 ) .* 100 );
+                    simResults.rNa(iParam, jParam) = mean( ( (1 + vec_rNa(vec_regime)) .^ 4 - 1 ) .* 100 );
+                    simResults.probDefFisLim(iParam, jParam) = mean( vec_probDefFisLim(vec_regime) .* 100 );
+
+                    simResults.regime(iParam, jParam) = sum(vec_regime) / length(vec_regime);
                  end
             else
                 % Non-stable solution
@@ -85,6 +94,7 @@ for iParam = 1:length(paramValues{1})
                 simResults.Pii(iParam, jParam)           = stateValues{2};
                 simResults.rNa(iParam, jParam)           = stateValues{2};
                 simResults.probDefFisLim(iParam, jParam) = stateValues{2};
+                simResults.regime(iParam, jParam)        = stateValues{2};
             end
         else
             eigvals = edu_ExtractNumberFromString(eigValsStr);
@@ -95,6 +105,7 @@ for iParam = 1:length(paramValues{1})
                 simResults(iParam, jParam).Pii   = stateValues{5};
                 simResults(iParam, jParam).rNa   = stateValues{5};
                 simResults(iParam, jParam).probDefFisLim   = stateValues{5};
+                simResults(iParam, jParam).regime   = stateValues{5};
             elseif ~isempty(eigvals) && eigvals(1) > eigvals(3)
                 % Multiple solutions
                 simResults(iParam, jParam).nrPolicy   = stateValues{4};
@@ -102,6 +113,7 @@ for iParam = 1:length(paramValues{1})
                 simResults(iParam, jParam).Pii        = stateValues{4};
                 simResults(iParam, jParam).rNa        = stateValues{4};
                 simResults(iParam, jParam).probDefFisLim        = stateValues{4};
+                simResults(iParam, jParam).regime        = stateValues{4};
             else
                 % No solution
                 simResults(iParam, jParam).nrPolicy      = stateValues{1};
@@ -109,6 +121,7 @@ for iParam = 1:length(paramValues{1})
                 simResults(iParam, jParam).Pii           = stateValues{1};
                 simResults(iParam, jParam).rNa           = stateValues{1};
                 simResults(iParam, jParam).probDefFisLim = stateValues{1};
+                simResults(iParam, jParam).regime        = stateValues{1};
             end
         end
     end

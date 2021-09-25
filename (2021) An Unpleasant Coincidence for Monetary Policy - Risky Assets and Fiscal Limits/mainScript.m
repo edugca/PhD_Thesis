@@ -260,3 +260,24 @@ distFiscalLimits;
 % In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solve_derivatives_type = 'automatic';
 % Run all sections until (including) section "Parameterize, solve the model, and assign the data (Policy Rules)"
 % Run section "Simulate Welfare"
+
+
+%% Plot Figure Stylized
+
+% Open routine setUps_polRules
+% Uncomment the code of the model rRN_inflation in the section "GRAPH: Risky 4 Rules: Actual debt level"
+% Uncomment the code of the models rRNWrong_inflation, rRN_inflation, and polDefAdjusted_inflation in the section "GRAPH: Risky 4 Rules: 5% debt level"
+% Comment the code in other sections
+
+% Open mainScript_model
+% In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solveOrder  = 1;
+% In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set solve_derivatives_type = 'symbolic';
+% In the section "Parameterize, solve the model, and assign the data (Policy Rules)", set steady_state_imposed = true;
+% Run all sections until (including) section "Parameterize, solve the model, and assign the data (Policy Rules)"
+% Reset steady_state_imposed = false ;
+% In section "Simulate the model", uncomment the line "%paramsStructTemp.sigmaM    = 0;"
+% Run section "Simulate the model"
+% In section "Simulate the model", comment the line "%paramsStructTemp.sigmaM    = 0;"
+% Run section "Simulation:Stylized histogram of Pii"
+
+

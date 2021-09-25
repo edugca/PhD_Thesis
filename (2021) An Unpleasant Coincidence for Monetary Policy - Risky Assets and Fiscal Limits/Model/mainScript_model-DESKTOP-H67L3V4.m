@@ -34,7 +34,7 @@ if saveToFinalFolder
 end
 
 % Path of RISE
-pathRISE = pub_Path('/Users/Eduardo/OneDrive/MATLAB/Resources/RISE_toolbox-master', 'C:\');
+pathRISE = edu_Path('/Users/Eduardo/OneDrive/MATLAB/Resources/RISE_toolbox-master', 'C:\');
 addpath(pathRISE);
 
 % Graph config
@@ -1728,7 +1728,7 @@ for iMdl = 1:length(mdlSimVector)
     if selectedShocksTurnOff
         paramsStructTemp.sigmaTau    = 0 ;
         paramsStructTemp.sigmaBeta    = 0 ;
-        %paramsStructTemp.sigmaM    = 0 ;
+        paramsStructTemp.sigmaM    = 0 ;
         %paramsStructTemp.sigmaPolDef = 0 ;
     end
 
@@ -2645,7 +2645,7 @@ colNames = '\multicolumn{3}{c}{$r^n_t$ (\% annualized)} & \multicolumn{3}{|c}{$r
 tbPath =  strjoin({pathTables 'Simulation' ['Table - Distribution - rNa and rEF - Debt Level ' title_debtLevel ' - ' title_polRule_simple ' - ' title_approxPoint ' - ' title_ZLB '.tex']}, filesep);
 edu_Table2Latex(tComp3, tbPath, 'colAlignment', colAlignment, 'colNames', colNames, 'tabWidth', tabWidth);
 
-%% Simulation: Stylized histogram of Pii
+%% Simulation:Stylized histogram of Pii
 
 %%%%%%%%%%%%%%%%%%
 removeNegativeNrPolicy = false;
@@ -2663,7 +2663,7 @@ plotXLims = {[3 6]}; % [-5 45], [0 10]
 nLins = 1;
 nCols  = ceil(length(histMdl)/nLins);
 
-fontSize = 14;
+fontSize = 12;
 tol = 1e-9;
 
 f = figure;
@@ -2767,7 +2767,7 @@ for iVar = 1:length(histVars)
                 text(mean(yData), yLim(1) + (yLim(2)-yLim(1))/10, txt, 'HorizontalAlignment', 'right', 'FontSize',12)
             elseif iMdl == plotVerticalBars(3)
                 txt = ['$\leftarrow$ ' num2str(mean(yData), '%.1f')];
-                text(mean(yData), yLim(1) + (yLim(2)-yLim(1))/10, txt, 'HorizontalAlignment', 'left', 'FontSize',12)
+                text(mean(yData), yLim(1) + (yLim(2)-yLim(1))/10, txt, 'HorizontalAlignment', 'right', 'FontSize',12)
             elseif iMdl == plotVerticalBars(4)
                 txt = ['$\leftarrow$ ' num2str(mean(yData), '%.1f') ' = $\overline{\pi}$'];
                 text(mean(yData), yLim(1) + (yLim(2)-yLim(1))/10, txt, 'HorizontalAlignment', 'left', 'FontSize',12)
@@ -2828,7 +2828,7 @@ else
     title_ZLB = 'No ZLB'; 
 end
 
-set(f, 'Position',  [100, 0, 1000, 300]); % resize figure
+set(f, 'Position',  [100, 0, 1200, 300]); % resize figure
 exportgraphics(f, ...
     strjoin({pathImages 'Distribution' title_stickyPrices graphType ['Graph - Stylized Dist - ' histVars{1} ' - Debt Level ' title_debtLevel ' - ' title_polRule_simple ' - ' title_approxPoint ' - ' title_ZLB '.png']}, filesep));
 edu_GraphSetInterpreter(previousInterpreter);

@@ -26,7 +26,7 @@ end
 updateFRED      = false;
 updateSPF       = false;
 updateWEO       = false;
-updateIMF       = false;
+updateIFS       = true;
 updateFOCUS     = false;
 updateOutputGap = false;
 
@@ -201,11 +201,33 @@ series_databases{ii}    = 'IFS';
 series_codes{ii}        = 'NGDP_R_XDC';
 series_frequencies{ii}  = 'Q';
 
+% Domestic Currency per U.S. Dollar, Period Average (ENDA_XDC_USD_RATE)
+ii = ii + 1;
+series_names{ii}        = 'FXAVG_';
+series_databases{ii}    = 'IFS';
+series_codes{ii}        = 'ENDA_XDC_USD_RATE';
+series_frequencies{ii}  = 'Q';
+
+% Nominal Effective Exchange Rate, Trade Partners by Consumer Price Index
+ii = ii + 1;
+series_names{ii}        = 'FXNOMEFF_';
+series_databases{ii}    = 'IFS';
+series_codes{ii}        = 'ENEER_IX';
+series_frequencies{ii}  = 'Q';
+
+% Real Effective Exchange Rate, based on Consumer Price Index
+ii = ii + 1;
+series_names{ii}        = 'FXREALEFF_';
+series_databases{ii}    = 'IFS';
+series_codes{ii}        = 'EREER_IX';
+series_frequencies{ii}  = 'Q';
+
 % Fetch series
-if updateIMF
+if updateIFS
     originalData_IMF = timetable();
     for ii = 1:length(series_names)
         for jj = 1:length(selAllCountries_2L)
+            pause(3); % Avoid being blocked
             aux = pub_Database_IMF_Fetch( ...
                 series_databases{ii}, series_codes{ii}, ...
                 selAllCountries_2L{jj}, series_frequencies{ii}, ...
@@ -290,7 +312,7 @@ for jj=1:length(ts.Properties.VariableNames)
     end
 end
 mdl_CPI_Forecast_Specs = mdl_CPI_Forecast_Specs(cellfun(@(x) ~isempty(x), mdl_CPI_Forecast_Specs(:,1)),:);
-mdl_Y_Forecast_Specs = mdl_Y_Forecast_Specs(cellfun(@(x) ~isempty(x), mdl_Y_Forecast_Specs(:,1)),:);
+%mdl_Y_Forecast_Specs = mdl_Y_Forecast_Specs(cellfun(@(x) ~isempty(x), mdl_Y_Forecast_Specs(:,1)),:);
 
 % Output: take the log
 selectedVars = startsWith(ts.Properties.VariableNames, 'Y_');
@@ -313,7 +335,7 @@ nPeriods = size(ts,1);
 
 %% SAVE/LOAD DATA
 
-%save([pathSaved, 'rStar_workspace.mat'])
+%save([pathSaved, 'rStar_workspace.mat']);
 
 load([pathSaved, 'rStar_workspace.mat']);
 

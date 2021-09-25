@@ -39,6 +39,8 @@ powerOfMonPol;
 simulation;
 
 %% Plot figures 13 to 19
+% In line 153, one can pick CDS, SPREAD, or LCCS as the risk measure
+
 empiricalCorrelations;
 
 %% Plot figure 20

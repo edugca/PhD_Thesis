@@ -26,6 +26,7 @@ dateEnd     = datetime(2019, 10, 1);
 sampleDates = dateStart:dateEnd;
 
 responseVar = 'inflation'; % 'inflation', 'expectedInflation'
+effectiveCoeff = true; % true or false
 
 fontSize = 12;
 fontSize_title = 12;
@@ -52,6 +53,22 @@ elseif strcmp(responseVar, 'expectedInflation')
                     '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \phi^{\pi}\left(\pi^e_t - \overline{\pi} \right)$',
                     '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi^e_t - \overline{\pi} \right)$'
                    };
+end
+
+if effectiveCoeff
+    xLabel = {
+                '$\phi^\pi$',
+                '$\left( 1 - \alpha^i \right)\phi^\pi$',
+                '$\phi^\pi$',
+                '$\left( 1 - \alpha^i \right)\phi^\pi$'
+              };
+else
+    xLabel = {
+                '$\phi^\pi$',
+                '$\phi^\pi$',
+                '$\phi^\pi$',
+                '$\phi^\pi$'
+              };
 end
 
 f = figure;
@@ -110,8 +127,10 @@ for iRule = 1:length(rulesList)
                 infCoeff(iCtr,2) = NaN;
             end
 
-            infCoeff(iCtr,1) = mdl.Coefficients.Estimate(2);
-            infCoeff(iCtr,2) = mdl.Coefficients.tStat(2);
+            if  effectiveCoeff
+                infCoeff(iCtr,1) = mdl.Coefficients.Estimate(2);
+                infCoeff(iCtr,2) = mdl.Coefficients.tStat(2);
+            end
             infCoeff(iCtr,3) = std(tsCPI{sampleDates,responseVarNameVol}, 'omitnan');
 
             ctrStatus{iCtr,1} = countriesList.ISO2{find(strcmp(ctrName, countriesList.ISO2))};
@@ -148,7 +167,7 @@ for iRule = 1:length(rulesList)
     ls(2).DisplayName = 'Advanced best-fit';
     ls(1).DisplayName = 'Emerging best-fit';
     uistack(ls(1), 'top');
-    xlabel('$\phi^{\pi}$');
+    xlabel(xLabel{iRule});
     ylabel('Inflation standard-deviation');
     set(gca, 'FontSize', fontSize);
     title([rulesTitles{iRule} newline rulesSpecs{iRule}], 'FontSize', fontSize_title);
