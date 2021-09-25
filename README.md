@@ -9,6 +9,3 @@ Welcome to my codes archive. Here, one can find replication material for my pape
 (2021) An Unpleasant Coincidence for Monetary Policy: Risky Assets and Fiscal Limits
 
 (2021) On the Mechanics of New-Keynesian Models: Smoothing the Capital Controversy Out
-
-(to be defined)
-(2021) New-Keynesian Models with Defaultable Policy Assets in Zero-Net-Supply
