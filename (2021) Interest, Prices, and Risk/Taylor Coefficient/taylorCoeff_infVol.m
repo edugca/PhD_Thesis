@@ -19,6 +19,9 @@ tsY = ts(:, namesALL(startsWith(namesALL,'NY_')));
 countriesCPI = cellfun(@(x) x(5:6), tsCPI.Properties.VariableNames, 'UniformOutput', false);
 countriesNR = cellfun(@(x) x(4:5), tsNR.Properties.VariableNames, 'UniformOutput', false);
 
+countriesCPI = unique(countriesCPI, 'stable');
+countriesNR  = unique(countriesNR, 'stable');
+
 %% Find Taylor pii-coefficient
 
 dateStart   = datetime(2000, 1, 1);
@@ -42,16 +45,16 @@ rulesTitles = {'No trend nor smoothing', 'Smoothing', 'Trend', 'Trend and smooth
 if strcmp(responseVar, 'inflation')
     rulesSpecs = {
                     '$i_t = \left(\overline{r}+\overline{\pi}\right) + \phi^{\pi}\left(\pi_t - \overline{\pi} \right)$',
-                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi_t - \overline{\pi} \right)$',
+                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^i\left(i_{t-1} - \overline{i}\right) + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi_t - \overline{\pi} \right)$',
                     '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \phi^{\pi}\left(\pi_t - \overline{\pi} \right)$',
-                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi_t - \overline{\pi} \right)$'
+                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \alpha^i\left(i_{t-1} - \overline{i}\right) + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi_t - \overline{\pi} \right)$'
                    };
 elseif strcmp(responseVar, 'expectedInflation')
     rulesSpecs = {
                     '$i_t = \left(\overline{r}+\overline{\pi}\right) + \phi^{\pi}\left(\pi^e_t - \overline{\pi} \right)$',
-                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi^e_t - \overline{\pi} \right)$',
+                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^i\left(i_{t-1} - \overline{i}\right) + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi^e_t - \overline{\pi} \right)$',
                     '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \phi^{\pi}\left(\pi^e_t - \overline{\pi} \right)$',
-                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \alpha^ii_{t-1} + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi^e_t - \overline{\pi} \right)$'
+                    '$i_t = \left(\overline{r}+\overline{\pi}\right) + \alpha^tt + \alpha^i\left(i_{t-1} - \overline{i}\right) + \left(1 - \alpha^i\right) \phi^{\pi}\left(\pi^e_t - \overline{\pi} \right)$'
                    };
 end
 
@@ -78,12 +81,14 @@ tl = tiledlayout(nLins, nCols);
 tl.TileSpacing  = 'compact';
 tl.Padding      = 'compact';
 selCountries    = {};
+smoothCoeff   = NaN(length(countriesCPI), length(rulesList));
+phiCoeff      = NaN(length(countriesCPI), length(rulesList));
 for iRule = 1:length(rulesList)
 
     taylorRule = rulesList{iRule};
     
-    infCoeff   = NaN(length(countriesCPI),3);
-    ctrStatus  = cell(length(countriesCPI),3); 
+    infCoeff      = NaN(length(countriesCPI), 3);
+    ctrStatus     = cell(length(countriesCPI),3); 
     for iCtr = 1:length(countriesCPI)
        ctrName = countriesCPI{iCtr};
        if ismember(ctrName, countriesNR) && ~ismember(ctrName, remFromSample)
@@ -110,21 +115,31 @@ for iRule = 1:length(rulesList)
             y = tsNR{sampleDates,['NR_' ctrName]};
 
             if strcmp(taylorRule, 'noSmoothing')
-                mdl = fitlm(x - mean(x), y);
+                mdl = fitlm(x - mean(x, 'omitnan'), y);
                 infCoeff(iCtr,1) = mdl.Coefficients.Estimate(2);
                 infCoeff(iCtr,2) = mdl.Coefficients.tStat(2);
+                
+                phiCoeff(iCtr, iRule) = mdl.Coefficients.Estimate(2);
             elseif strcmp(taylorRule, 'smoothing')
-                mdl = fitlm([x(2:end) - mean(x), y(1:end-1)], y(2:end));
+                mdl = fitlm([x(2:end) - mean(x, 'omitnan'), y(1:end-1) - mean(y, 'omitnan')], y(2:end));
                 infCoeff(iCtr,1) = mdl.Coefficients.Estimate(2) / (1 - mdl.Coefficients.Estimate(3));
                 infCoeff(iCtr,2) = NaN;
+                
+                smoothCoeff(iCtr, iRule) = mdl.Coefficients.Estimate(3);
+                phiCoeff(iCtr, iRule) = mdl.Coefficients.Estimate(2) / (1 - mdl.Coefficients.Estimate(3));
             elseif strcmp(taylorRule, 'trend')
-                mdl = fitlm([x - mean(x), (1:length(x))'], y);
+                mdl = fitlm([x - mean(x, 'omitnan'), (1:length(x))'], y);
                 infCoeff(iCtr,1) = mdl.Coefficients.Estimate(2);
                 infCoeff(iCtr,2) = mdl.Coefficients.tStat(2);
+                
+                phiCoeff(iCtr, iRule) = mdl.Coefficients.Estimate(2);
             elseif strcmp(taylorRule, 'trendAndSmoothing')
-                mdl = fitlm([x(2:end) - mean(x), (2:length(x))', y(1:end-1)], y(2:end));
+                mdl = fitlm([x(2:end) - mean(x, 'omitnan'), (2:length(x))', y(1:end-1) - mean(y, 'omitnan')], y(2:end));
                 infCoeff(iCtr,1) = mdl.Coefficients.Estimate(2) / (1 - mdl.Coefficients.Estimate(4));
                 infCoeff(iCtr,2) = NaN;
+                
+                smoothCoeff(iCtr, iRule) = mdl.Coefficients.Estimate(4);
+                phiCoeff(iCtr, iRule) = mdl.Coefficients.Estimate(2) / (1 - mdl.Coefficients.Estimate(4));
             end
 
             if  effectiveCoeff
@@ -183,3 +198,9 @@ end
 simGraphName = ['taylorRules_empirical_' responseVar '.png'];
 set(gcf, 'Position',  [100, 100, 800, 800]); % resize figure
 saveas(f,[pathImages, simGraphName]);
+
+% Smoothing and Phi coefficients
+tSmooth = array2table(smoothCoeff, 'RowNames', countriesCPI, 'VariableNames', rulesTitles);
+tPhi = array2table(phiCoeff, 'RowNames', countriesCPI, 'VariableNames', rulesTitles);
+disp(tSmooth);
+disp(tPhi);

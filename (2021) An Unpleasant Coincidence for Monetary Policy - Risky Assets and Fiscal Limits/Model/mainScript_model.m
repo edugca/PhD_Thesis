@@ -280,8 +280,8 @@ end
 
 solveOrder  = 1;
 solve_derivatives_type = 'symbolic'; % symbolic, automatic, numerical  %%% in case of optimal rule, cannot be symbolic
-debugMode   = true; % true, false
-steady_state_imposed = false;  % if imposed, then does not check whether it is a steady state (solves around the reference regime ss)
+debugMode   = false; % true, false
+steady_state_imposed = true;  % if imposed, then does not check whether it is a steady state (solves around the reference regime ss)
 steady_state_unique = false; % the steady state is unique: solves around the "ergodic mean" and does not run the steady state file
 solveModel;
 
@@ -1294,7 +1294,7 @@ rng(1900)
 
 nSims                                   = 4;
 simul_regime                            = 1:nRegimes; % 1:nRegimes
-simul_order                             = 1;
+simul_order                             = 2;
 simul_pruned                            = true;
 simul_honor_constraints                 = true; % true or false
 simul_honor_constraints_through_switch  = true; % true or false
@@ -1308,8 +1308,8 @@ simul_shock_uncertainty                 = true; % true or false
 %loadParamsAndSimulFiscalLimits;
 
 % Override calibration parameters
-paramNamesOverride      = {}; % ex: tfpLoss, deltaBar
-paramValuesOverride     = {}; % ex: 0
+paramNamesOverride      = {'fracNR'}; % ex: tfpLoss, deltaBar
+paramValuesOverride     = {0}; % ex: 0
 
 % If param is switching, define as i.e. {{'phi_fisLim_1', 'phi_fisLim_2'}} to
 % match params in every iteration
@@ -2645,23 +2645,26 @@ colNames = '\multicolumn{3}{c}{$r^n_t$ (\% annualized)} & \multicolumn{3}{|c}{$r
 tbPath =  strjoin({pathTables 'Simulation' ['Table - Distribution - rNa and rEF - Debt Level ' title_debtLevel ' - ' title_polRule_simple ' - ' title_approxPoint ' - ' title_ZLB '.tex']}, filesep);
 edu_Table2Latex(tComp3, tbPath, 'colAlignment', colAlignment, 'colNames', colNames, 'tabWidth', tabWidth);
 
-%% Simulation: Stylized histogram of Pii
+%% Simulation: Stylized histogram of Pii and YGap
 
 %%%%%%%%%%%%%%%%%%
 removeNegativeNrPolicy = false;
 graphType = 'Stylized';
-plotVerticalBars = [1,2,3,4];
+plotVerticalBars = [1,2,3,4,5,6,7,8];
+plotTargets = [1,4,5,8];
 %%%%%%%%%%%%%%%%%%
 
 histMdl = mdlSimVector;
-histVars = {'Pii'}; % 'nrPolicy', 'Pii', 'rPolicy', 'rGov'
-histTexVars = {'$\Pi_t$'}; % '$i_t$', '$\Pi_t$', '$r_t$', '$r^{Gov}_t$'
+histVars = {'Pii', 'yGap'}; % 'nrPolicy', 'Pii', 'rPolicy', 'rGov', 'yGap'
+histTexVars = {'$\Pi_t$', '$Y^{Gap}_t$'}; % '$i_t$', '$\Pi_t$', '$r_t$', '$r^{Gov}_t$'
+histTexTargets = {'\overline{\pi}', '\overline{Y^{Gap}}'}; % \overline{\pi}, \overline{Y^{Gap}}
+histPosition = {'left', '', '', 'left', 'right', '', '', 'right'}; % left, right
 plotColors = {'b', 'r', 'k', [0.4660 0.6740 0.1880]};
 plotStyles = {'-', ':', '-.', '--'};
 plotLineWidth = {1, 3, 1, 1};
-plotXLims = {[3 6]}; % [-5 45], [0 10]
-nLins = 1;
-nCols  = ceil(length(histMdl)/nLins);
+plotXLims = {[3, 6], [-4 2]}; % [3 6], [-6 3]
+nLins   = length(histVars);
+nCols   = ceil(length(histMdl)); 
 
 fontSize = 14;
 tol = 1e-9;
@@ -2678,6 +2681,7 @@ yRPolicy    = [];
 yRGov       = [];
 yRNa       = [];
 yREF       = [];
+yYGap      = [];
 for iChain = 1:length(simRecord)
     yNrPolicy = [yNrPolicy; simRecord(iChain).('nrPolicy').values];
     yPii = [yPii; simRecord(iChain).('Pii').values];
@@ -2685,13 +2689,17 @@ for iChain = 1:length(simRecord)
     yRGov = [yRGov; simRecord(iChain).('rGov').values];
     yRNa = [yRNa; simRecord(iChain).('rNa').values];
     yREF = [yREF; simRecord(iChain).('rEF').values];
+    
+    yYGap = [yYGap; simRecord(iChain).('y').values - simRecord(iChain).('yNa').values];
 end
 
+iGraph = 0;
 for iVar = 1:length(histVars)
     
     h = gobjects(length(histMdl), 1);
     for iMdl = 1:length(histMdl)
         nexttile();
+        iGraph = iGraph + 1;
         
         % Remove negative interest rates
         if removeNegativeNrPolicy
@@ -2701,6 +2709,8 @@ for iVar = 1:length(histVars)
             yRGov_Mdl       = yRGov(yNrPolicy(:,iMdl) >= 0, iMdl);
             yRNa_Mdl        = yRNa(yNrPolicy(:,iMdl) >= 0, iMdl);
             yREF_Mdl        = yREF(yNrPolicy(:,iMdl) >= 0, iMdl);
+            
+            yYGap_Mdl        = yYGap(yNrPolicy(:,iMdl) >= 0, iMdl);
         else
             yPii_Mdl        = yPii(:, iMdl);
             yNrPolicy_Mdl   = yNrPolicy(:, iMdl);
@@ -2708,8 +2718,11 @@ for iVar = 1:length(histVars)
             yRGov_Mdl       = yRGov(:, iMdl);
             yRNa_Mdl        = yRNa(:, iMdl);
             yREF_Mdl        = yREF(:, iMdl);
+            
+            yYGap_Mdl        = yYGap(:, iMdl);
         end
         
+        nDecimals = 1;
         if strcmp(histVars{iVar}, 'nrPolicy')
             histTexVars{iVar} = '$i_t$ (\% annualized)';
             y_tau = yNrPolicy_Mdl;
@@ -2728,12 +2741,29 @@ for iVar = 1:length(histVars)
         elseif strcmp(histVars{iVar}, 'rEF')
             histTexVars{iVar} = '$r^{Eff}_t$ (\% annualized)';
             y_tau = yREF_Mdl;
+        elseif strcmp(histVars{iVar}, 'yGap')
+            histTexVars{iVar} = '$Y^{Gap}_t$ (\% annualized)';
+            y_tau = yYGap_Mdl;
+            
+            nDecimals = 1;
         end
+        
+        % Get steady-state values
+        ssMatrix     = [];
+        ssVarNames   = [];
+        nRegimes     = histMdl(iMdl).markov_chains.regimes_number;
+        ssMatrix     = [ssMatrix, [histMdl(iMdl).solution.ss{:}]];
+        ssVarNames   = [ssVarNames; strcat("Mdl ", num2str(iMdl), "; Regime ", string(1:nRegimes)')];
+        tSS = array2table(ssMatrix);
+        tSS.Properties.VariableNames    = ssVarNames;
+        tSS.Properties.RowNames         = histMdl(iMdl).endogenous.name;
         
         if ismember(histVars{iVar}, {'nrPolicy', 'rPolicy', 'rGov', 'rNa', 'rEF'})
             yData = ((1 + y_tau).^4 - 1).*100;
         elseif strcmp(histVars{iVar}, 'Pii')
             yData = ((y_tau).^4 - 1).*100;
+        elseif strcmp(histVars{iVar}, 'yGap')
+            yData = ((1 + (y_tau ./ tSS{'yNa',1})).^4 - 1).*100;
         end
         
         % Check whether there is variance
@@ -2759,21 +2789,23 @@ for iVar = 1:length(histVars)
 
             yLim = get(gca,'ylim');
             xLim = get(gca,'xlim');
-            if iMdl == plotVerticalBars(1)
-                txt = ['$\leftarrow$ ' num2str(mean(yData), '%.1f') ' = $\overline{\pi}$'];
-                text(mean(yData), yLim(1) + (yLim(2)-yLim(1))/10, txt, 'HorizontalAlignment', 'left', 'FontSize',12)
-            elseif iMdl == plotVerticalBars(2)
-                txt = [num2str(mean(yData), '%.1f') '$\rightarrow$ '];
+            if strcmp(histPosition{iGraph}, 'right') || lastMean <= mean(yData)
+                txt = [num2str(mean(yData), ['%.' num2str(nDecimals) 'f']) '$\rightarrow$ '];
+                if ismember(iGraph, plotTargets)
+                    txt = ['$' histTexTargets{iVar} '$ = ' txt];
+                end
                 text(mean(yData), yLim(1) + (yLim(2)-yLim(1))/10, txt, 'HorizontalAlignment', 'right', 'FontSize',12)
-            elseif iMdl == plotVerticalBars(3)
-                txt = ['$\leftarrow$ ' num2str(mean(yData), '%.1f')];
-                text(mean(yData), yLim(1) + (yLim(2)-yLim(1))/10, txt, 'HorizontalAlignment', 'left', 'FontSize',12)
-            elseif iMdl == plotVerticalBars(4)
-                txt = ['$\leftarrow$ ' num2str(mean(yData), '%.1f') ' = $\overline{\pi}$'];
+            elseif strcmp(histPosition{iGraph}, 'left') || lastMean > mean(yData)
+                txt = ['$\leftarrow$ ' num2str(mean(yData), ['%.' num2str(nDecimals) 'f'])];
+                if ismember(iGraph, plotTargets)
+                    txt = [txt ' = $' histTexTargets{iVar} '$'];
+                end
                 text(mean(yData), yLim(1) + (yLim(2)-yLim(1))/10, txt, 'HorizontalAlignment', 'left', 'FontSize',12)
             end
 
             h(iMdl) = xl;
+            
+            lastMean = mean(yData);
         end
         
         set(gca, 'FontSize', fontSize);
@@ -2828,7 +2860,7 @@ else
     title_ZLB = 'No ZLB'; 
 end
 
-set(f, 'Position',  [100, 0, 1000, 300]); % resize figure
+set(f, 'Position',  [100, 0, 1000, 600]); % resize figure
 exportgraphics(f, ...
     strjoin({pathImages 'Distribution' title_stickyPrices graphType ['Graph - Stylized Dist - ' histVars{1} ' - Debt Level ' title_debtLevel ' - ' title_polRule_simple ' - ' title_approxPoint ' - ' title_ZLB '.png']}, filesep));
 edu_GraphSetInterpreter(previousInterpreter);
