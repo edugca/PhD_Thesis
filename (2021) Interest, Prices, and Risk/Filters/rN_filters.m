@@ -26,7 +26,7 @@ end
 updateFRED      = false;
 updateSPF       = false;
 updateWEO       = false;
-updateIFS       = true;
+updateIFS       = false;
 updateFOCUS     = false;
 updateOutputGap = false;
 
@@ -263,6 +263,30 @@ for jj=1:length(ts.Properties.VariableNames)
     end
 end
 
+% FX Nominal: Quarterly annualized % change
+selectedVars = startsWith(ts.Properties.VariableNames, 'FXAVG_');
+for jj=1:length(ts.Properties.VariableNames)
+    if selectedVars(jj) == 1
+        ts.(ts.Properties.VariableNames{jj}) = 100 * [nan; (ts.(ts.Properties.VariableNames{jj})(2:end) ./ ts.(ts.Properties.VariableNames{jj})(1:end-1)).^4 - 1];
+    end
+end
+
+% FX Nominal Effective: Quarterly annualized % change
+selectedVars = startsWith(ts.Properties.VariableNames, 'FXNOMEFF_');
+for jj=1:length(ts.Properties.VariableNames)
+    if selectedVars(jj) == 1
+        ts.(ts.Properties.VariableNames{jj}) = 100 * [nan; (ts.(ts.Properties.VariableNames{jj})(2:end) ./ ts.(ts.Properties.VariableNames{jj})(1:end-1)).^4 - 1];
+    end
+end
+
+% FX Real Effective: Quarterly annualized % change
+selectedVars = startsWith(ts.Properties.VariableNames, 'FXREALEFF_');
+for jj=1:length(ts.Properties.VariableNames)
+    if selectedVars(jj) == 1
+        ts.(ts.Properties.VariableNames{jj}) = 100 * [nan; (ts.(ts.Properties.VariableNames{jj})(2:end) ./ ts.(ts.Properties.VariableNames{jj})(1:end-1)).^4 - 1];
+    end
+end
+
 % CPI Forecast: Quarterly annualized % change
 nHorizon = 4;
 pMax = 4;
@@ -359,7 +383,7 @@ previousInterpreter = pub_GraphSetInterpreter('latex');
 tlAdvanced = tiledlayout(fAdvanced, 'flow');
 tlAdvanced.TileSpacing  = 'compact';
 tlAdvanced.Padding      = 'compact';
-legendInFirstSubPlot = false;
+legendInFirstSubPlot = true;
 if legendInFirstSubPlot
    legend_axes_advanced = nexttile(tlAdvanced); 
 end
@@ -367,7 +391,7 @@ end
 tlEmerging = tiledlayout(fEmerging, 'flow');
 tlEmerging.TileSpacing  = 'compact';
 tlEmerging.Padding      = 'compact';
-legendInFirstSubPlot = false;
+legendInFirstSubPlot = true;
 if legendInFirstSubPlot
    legend_axes_emerging = nexttile(tlEmerging); 
 end

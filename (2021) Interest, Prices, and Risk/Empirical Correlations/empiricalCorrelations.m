@@ -159,7 +159,7 @@ countryGroupConversions = {emerging_conversion, advanced_conversion};
 
 countryGroupMeasureInterestRate = {'NR', 'NR'};
 countryGroupMeasureInflation    = {'CPI', 'CPI'};
-countryGroupMeasureRisk         = {'LCCS', 'LCCS'}; %SPREAD, CDS or LCCS
+countryGroupMeasureRisk         = {'CDS', 'SPREAD'}; %SPREAD, CDS or LCCS
 countryGroupMeasureFX           = {'FXAVG', 'FXAVG'}; %FXAVG
 
 countriesSelectedPerGroup = {};
@@ -284,7 +284,7 @@ for iGroup = 1:length(countryGroupNames)
         end
         sc1 = scatter(x,y, 'filled');
         title([cName, newline, '4-quarter change'], 'FontWeight', 'normal');
-        xlabel('Policy rate (p.p.)');
+        xlabel('Nominal interest rate (p.p.)');
         ylabel('YoY CPI inflation (p.p.)');
         hline = lsline();
         mdl = fitlm(get(sc1,'xdata')', get(sc1,'ydata')');
@@ -313,7 +313,7 @@ for iGroup = 1:length(countryGroupNames)
         end
         sc2 = scatter(x,y, 'filled');
         title([cName, newline, '4-quarter change'], 'FontWeight', 'normal');
-        xlabel('Policy rate (p.p.)');
+        xlabel('Nominal interest rate (p.p.)');
         ylabel([countryGroupMeasureRisk{iGroup} ' (p.p.)']);
         hline = lsline();
         mdl = fitlm(get(sc2,'xdata')', get(sc2,'ydata')');
@@ -375,6 +375,7 @@ pub_GraphSetInterpreter(previousInterpreter);
 
 removeOutliers = true;
 removeOutliersMethod = 'median';
+includeFX = false;
 
 for iGroup = 1:length(countryGroupNames)
     
@@ -444,7 +445,7 @@ for iGroup = 1:length(countryGroupNames)
     subplot('position',pos(iGraph,:,1));
     sc1 = scatter(data_nr_cpi(:,4), data_nr_cpi(:,5), 'filled');
     title([countryGroupNames{iGroup} ' economies: 4-quarter change'], 'FontWeight', 'normal');
-    xlabel('Policy rate (p.p.)');
+    xlabel('Nominal interest rate (p.p.)');
     ylabel('YoY CPI inflation (p.p.)');
     hline = lsline();
     mdl_nr_cpi = fitlm(get(sc1,'xdata')', get(sc1,'ydata')', ...
@@ -461,7 +462,7 @@ for iGroup = 1:length(countryGroupNames)
     tStat3  = mdl3_nr_cpi.Coefficients.tStat;
     legStr = {  ['y = ' num2str(coeffs(1), '%.2f') ' + ' num2str(coeffs(2), '%.2f'), '(', num2str(tStat(end), '%.2f'), ')', 'x', newline, ...
                  'y = ' num2str(coeffs2(1), '%.2f') ' + country + ' num2str(coeffs2(end), '%.2f'), '(', num2str(tStat2(end), '%.2f'), ')', 'x', newline, ...
-                 'y = ' num2str(coeffs3(1), '%.2f') ' + country + ' num2str(coeffs3(3), '%.2f') '(', num2str(tStat3(3), '%.2f'), ')' 'infTarget + ' num2str(coeffs3(end), '%.2f'), '(', num2str(tStat3(end), '%.2f'), ')', 'x'
+                 'y = ' num2str(coeffs3(1), '%.2f') ' + country + ' num2str(coeffs3(end-1), '%.2f') '(', num2str(tStat3(end-1), '%.2f'), ')' 'infTarget + ' num2str(coeffs3(end), '%.2f'), '(', num2str(tStat3(end), '%.2f'), ')', 'x'
                  ]};
     legend(hline, legStr, 'Location', 'southoutside');
 
@@ -469,15 +470,15 @@ for iGroup = 1:length(countryGroupNames)
     subplot('position',pos(iGraph,:,1));
     sc2 = scatter(data_nr_cds(:,4), data_nr_cds(:,5), 'filled');
     title([countryGroupNames{iGroup} ' economies: 4-quarter change'], 'FontWeight', 'normal');
-    xlabel('Policy rate (p.p.)');
+    xlabel('Nominal interest rate (p.p.)');
     ylabel([codeRisk ' (p.p.)']);
     hline = lsline();
     mdl_nr_cds = fitlm(get(sc2,'xdata')', get(sc2,'ydata')', ...
-        'RobustOpts', robustReg, 'VarNames', {'nr','cpi'});
+        'RobustOpts', robustReg, 'VarNames', {'nr','risk'});
     mdl2_nr_cds = fitlm([data_nr_cds(:,1), get(sc2,'xdata')'], get(sc2,'ydata')', ...
-        'CategoricalVars', 1, 'RobustOpts', robustReg, 'VarNames', {'country', 'nr','cpi'});
+        'CategoricalVars', 1, 'RobustOpts', robustReg, 'VarNames', {'country', 'nr','risk'});
     mdl3_nr_cds = fitlm([data_nr_cds(:,[1,3]), get(sc2,'xdata')'], get(sc2,'ydata')', ...
-        'CategoricalVars', 1, 'RobustOpts', robustReg, 'VarNames', {'country', 'inflationTarget', 'nr','cpi'});
+        'CategoricalVars', 1, 'RobustOpts', robustReg, 'VarNames', {'country', 'inflationTarget', 'nr','risk'});
     coeffs  = mdl_nr_cds.Coefficients.Estimate;
     tStat   = mdl_nr_cds.Coefficients.tStat;
     coeffs2 = mdl2_nr_cds.Coefficients.Estimate;
@@ -486,7 +487,7 @@ for iGroup = 1:length(countryGroupNames)
     tStat3  = mdl3_nr_cds.Coefficients.tStat;
     legStr = {  ['y = ' num2str(coeffs(1), '%.2f') ' + ' num2str(coeffs(2), '%.2f'), '(', num2str(tStat(end), '%.2f'), ')', 'x', newline, ...
                  'y = ' num2str(coeffs2(1), '%.2f') ' + country + ' num2str(coeffs2(end), '%.2f'), '(', num2str(tStat2(end), '%.2f'), ')', 'x', newline, ...
-                 'y = ' num2str(coeffs3(1), '%.2f') ' + country + ' num2str(coeffs3(3), '%.2f') '(', num2str(tStat3(3), '%.2f'), ')' 'infTarget + ' num2str(coeffs3(end), '%.2f'), '(', num2str(tStat3(end), '%.2f'), ')', 'x'
+                 'y = ' num2str(coeffs3(1), '%.2f') ' + country + ' num2str(coeffs3(end-1), '%.2f') '(', num2str(tStat3(end-1), '%.2f'), ')' 'infTarget + ' num2str(coeffs3(end), '%.2f'), '(', num2str(tStat3(end), '%.2f'), ')', 'x'
                  ]};
     legend(hline, legStr, 'Location', 'southoutside');
 
@@ -498,21 +499,31 @@ for iGroup = 1:length(countryGroupNames)
     ylabel([codeRisk ' (p.p.)']);
     hline = lsline();
     mdl_cpi_cds = fitlm(get(sc3,'xdata')', get(sc3,'ydata')', ...
-        'RobustOpts', robustReg, 'VarNames', {'nr','cpi'});
+        'RobustOpts', robustReg, 'VarNames', {'cpi','risk'});
     mdl2_cpi_cds = fitlm([data_cpi_cds(:,1), get(sc3,'xdata')'], get(sc3,'ydata')', ...
-        'CategoricalVars', 1, 'RobustOpts', robustReg, 'VarNames', {'country', 'nr','cpi'});
+        'CategoricalVars', 1, 'RobustOpts', robustReg, 'VarNames', {'country', 'cpi','risk'});
     mdl3_cpi_cds = fitlm([data_cpi_cds(:,[1,3]), get(sc3,'xdata')'], get(sc3,'ydata')', ...
-        'CategoricalVars', 1, 'RobustOpts', robustReg, 'VarNames', {'country', 'inflationTarget', 'nr','cpi'});
+        'CategoricalVars', 1, 'RobustOpts', robustReg, 'VarNames', {'country', 'inflationTarget', 'cpi','risk'});
+    mdl4_cpi_cds = fitlm([data_cpi_cds(:,[1,3,6]), get(sc3,'xdata')'], get(sc3,'ydata')', ...
+        'CategoricalVars', 1, 'RobustOpts', robustReg, 'VarNames', {'country', 'inflationTarget', 'fx', 'cpi','risk'});
     coeffs  = mdl_cpi_cds.Coefficients.Estimate;
     tStat   = mdl_cpi_cds.Coefficients.tStat;
     coeffs2 = mdl2_cpi_cds.Coefficients.Estimate;
     tStat2  = mdl2_cpi_cds.Coefficients.tStat;
     coeffs3 = mdl3_cpi_cds.Coefficients.Estimate;
     tStat3  = mdl3_cpi_cds.Coefficients.tStat;
+    coeffs4 = mdl4_cpi_cds.Coefficients.Estimate;
+    tStat4  = mdl4_cpi_cds.Coefficients.tStat;
     legStr = {  ['y = ' num2str(coeffs(1), '%.2f') ' + ' num2str(coeffs(2), '%.2f'), '(', num2str(tStat(end), '%.2f'), ')', 'x', newline, ...
                  'y = ' num2str(coeffs2(1), '%.2f') ' + country + ' num2str(coeffs2(end), '%.2f'), '(', num2str(tStat2(end), '%.2f'), ')', 'x', newline, ...
-                 'y = ' num2str(coeffs3(1), '%.2f') ' + country + ' num2str(coeffs3(3), '%.2f') '(', num2str(tStat3(3), '%.2f'), ')' 'infTarget + ' num2str(coeffs3(end), '%.2f'), '(', num2str(tStat3(end), '%.2f'), ')', 'x'
+                 'y = ' num2str(coeffs3(1), '%.2f') ' + country + ' num2str(coeffs3(end-1), '%.2f') '(', num2str(tStat3(end-1), '%.2f'), ')' 'infTarget + ' num2str(coeffs3(end), '%.2f'), '(', num2str(tStat3(end), '%.2f'), ')', 'x'
                  ]};
+    if includeFX
+        legStr = [legStr, ...
+                        newline, ...
+                        'y = ' num2str(coeffs4(1), '%.2f') ' + country + ' num2str(coeffs4(end-2), '%.2f') '(', num2str(tStat4(end-2), '%.2f'), ')' 'infTarget + ' num2str(coeffs4(end-1), '%.2f') '(', num2str(tStat4(end-1), '%.2f'), ')' 'fx + ' num2str(coeffs4(end), '%.2f'), '(', num2str(tStat4(end), '%.2f'), ')', 'x'
+                    ];
+    end
     legend(hline, legStr, 'Location', 'southoutside');
 
     % Format all graphs
