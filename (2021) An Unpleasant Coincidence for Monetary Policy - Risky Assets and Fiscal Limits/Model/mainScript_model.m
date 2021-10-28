@@ -1709,6 +1709,9 @@ selectedShocksTurnOff = true;
 mdlSimVector = mdlVector;
 for iMdl = 1:length(mdlSimVector)
     paramsStructTemp = struct();
+    
+    %paramsStructTemp.tfpLoss    = 0.01 ;
+    
     if polRule_simple
         %paramsStructTemp.piiBar  = 0 ;
         paramsStructTemp.phi_dY  = 0 ;
@@ -1728,7 +1731,7 @@ for iMdl = 1:length(mdlSimVector)
     if selectedShocksTurnOff
         paramsStructTemp.sigmaTau    = 0 ;
         paramsStructTemp.sigmaBeta    = 0 ;
-        %paramsStructTemp.sigmaM    = 0 ;
+        paramsStructTemp.sigmaM    = 0 ;
         %paramsStructTemp.sigmaPolDef = 0 ;
     end
 
@@ -2655,14 +2658,14 @@ plotTargets = [1,4,5,8];
 %%%%%%%%%%%%%%%%%%
 
 histMdl = mdlSimVector;
-histVars = {'Pii', 'yGap'}; % 'nrPolicy', 'Pii', 'rPolicy', 'rGov', 'yGap'
-histTexVars = {'$\Pi_t$', '$Y^{Gap}_t$'}; % '$i_t$', '$\Pi_t$', '$r_t$', '$r^{Gov}_t$'
-histTexTargets = {'\overline{\pi}', '\overline{Y^{Gap}}'}; % \overline{\pi}, \overline{Y^{Gap}}
-histPosition = {'left', '', '', 'left', 'right', '', '', 'right'}; % left, right
+histVars = {'Pii', 'yGap', 'rGap'}; % 'nrPolicy', 'Pii', 'rPolicy', 'rGov', 'yGap'
+histTexVars = {'$\Pi_t$', '$Y^{Gap}_t$', '$r^{Gap}_t$'}; % '$i_t$', '$\Pi_t$', '$r_t$', '$r^{Gov}_t$'
+histTexTargets = {'\overline{\pi}', '\overline{Y^{Gap}}', '\overline{r^{Gap}}'}; % \overline{\pi}, \overline{Y^{Gap}}
+histPosition = {'left', '', '', 'left', 'right', '', '', 'right', 'left', '', '', ''}; % left, right
 plotColors = {'b', 'r', 'k', [0.4660 0.6740 0.1880]};
 plotStyles = {'-', ':', '-.', '--'};
 plotLineWidth = {1, 3, 1, 1};
-plotXLims = {[3, 6], [-4 2]}; % [3 6], [-6 3]
+plotXLims = {[0, 9], [-5 5], [-5 5]}; % [3 6], [-4 2]
 nLins   = length(histVars);
 nCols   = ceil(length(histMdl)); 
 
@@ -2682,6 +2685,7 @@ yRGov       = [];
 yRNa       = [];
 yREF       = [];
 yYGap      = [];
+yRGap      = [];
 for iChain = 1:length(simRecord)
     yNrPolicy = [yNrPolicy; simRecord(iChain).('nrPolicy').values];
     yPii = [yPii; simRecord(iChain).('Pii').values];
@@ -2691,12 +2695,14 @@ for iChain = 1:length(simRecord)
     yREF = [yREF; simRecord(iChain).('rEF').values];
     
     yYGap = [yYGap; simRecord(iChain).('y').values - simRecord(iChain).('yNa').values];
+    yRGap = [yRGap; simRecord(iChain).('rRN').values - simRecord(iChain).('rNa').values];
 end
 
 iGraph = 0;
 for iVar = 1:length(histVars)
     
     h = gobjects(length(histMdl), 1);
+    lastMean = NaN;
     for iMdl = 1:length(histMdl)
         nexttile();
         iGraph = iGraph + 1;
@@ -2711,6 +2717,7 @@ for iVar = 1:length(histVars)
             yREF_Mdl        = yREF(yNrPolicy(:,iMdl) >= 0, iMdl);
             
             yYGap_Mdl        = yYGap(yNrPolicy(:,iMdl) >= 0, iMdl);
+            yRGap_Mdl        = yRGap(yNrPolicy(:,iMdl) >= 0, iMdl);
         else
             yPii_Mdl        = yPii(:, iMdl);
             yNrPolicy_Mdl   = yNrPolicy(:, iMdl);
@@ -2720,6 +2727,7 @@ for iVar = 1:length(histVars)
             yREF_Mdl        = yREF(:, iMdl);
             
             yYGap_Mdl        = yYGap(:, iMdl);
+            yRGap_Mdl        = yRGap(:, iMdl);
         end
         
         nDecimals = 1;
@@ -2746,6 +2754,11 @@ for iVar = 1:length(histVars)
             y_tau = yYGap_Mdl;
             
             nDecimals = 1;
+        elseif strcmp(histVars{iVar}, 'rGap')
+            histTexVars{iVar} = '$r^{Gap}_t$ (\% annualized)';
+            y_tau = yRGap_Mdl;
+            
+            nDecimals = 1;
         end
         
         % Get steady-state values
@@ -2764,6 +2777,8 @@ for iVar = 1:length(histVars)
             yData = ((y_tau).^4 - 1).*100;
         elseif strcmp(histVars{iVar}, 'yGap')
             yData = ((1 + (y_tau ./ tSS{'yNa',1})).^4 - 1).*100;
+        elseif strcmp(histVars{iVar}, 'rGap')
+            yData = ((1 + y_tau).^4 - 1).*100;
         end
         
         % Check whether there is variance
@@ -2973,7 +2988,7 @@ edu_GraphSetInterpreter(previousInterpreter);
 %% Simulation: histogram of selected variables (regime-specific distribution)
 
 histMdl = mdlSimVector;
-histVars = {'nrPolicy', 'Pii', 'bY', 'fisLim_1_2', 'y', 'c', 'cR', 'cNR', 'n', 'gY', 'tau', 'tax', 'welfare', 'welfareR', 'welfareNR'};
+histVars = {'nrPolicy', 'Pii', 'bY', 'r1fisLim_1_2', 'y', 'c', 'cR', 'cNR', 'n', 'gY', 'tau', 'tax', 'welfare', 'welfareR', 'welfareNR'};
 histTexVars = {'$i_t$', '$\Pi_t$', '$\frac{B_t}{Y_t}$', '$\mathcal{D}_t$', '$Y_t$', '$C_t$', '$C^R_t$', '$C^{NR}_t$', '$N_t$', '$\frac{G_t}{Y_t}$', '$\tau_t$', '$T_t$', '$U_t$', '$U^{R}_t$', '$U^{NR}_t$'};
 plotColors = {'b', 'r', 'k', [0.4660 0.6740 0.1880]};
 plotStyles = {'-', ':', '-.', '--'};
@@ -2984,7 +2999,7 @@ fontSize = 12;
 
 tol = 10e-10;
 
-for iReg = 1:2
+for iReg = 3:4
 
     f = figure;
     previousInterpreter = edu_GraphSetInterpreter('latex');
@@ -3053,7 +3068,7 @@ end
 %% Simulation: histogram of transition probabilities
 
 histMdl = mdlSimVector;
-histVars = {'taxLim_1_2', 'taxLim_2_1', 'fisLim_1_2', 'fisLim_2_1'};
+histVars = {'r2taxLim_1_2', 'r2taxLim_2_1', 'r1fisLim_1_2', 'r1fisLim_2_1'};
 histTexVars = {'$\text{TL}12_t$', '$\text{TL}21_t$', '$\text{FL}12_t$', '$\text{FL}21_t$'};
 plotColors = {'b', 'r', 'k'};
 

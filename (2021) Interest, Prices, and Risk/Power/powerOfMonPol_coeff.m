@@ -23,6 +23,17 @@ else
     imagesFolder = 'Power/Images/';
 end
 
+%% Parameterization
+
+% Pick the regime
+regime = 'Inflation'; % 'PriceLevel' or 'Inflation'
+
+if strcmp(regime, 'PriceLevel')
+    phiRegime = [0.1, 0.5, 1.0];
+elseif strcmp(regime, 'Inflation')
+    phiRegime = [1.1, 1.5, 2.0];
+end
+
 %% Function
 
 nSims   = 100;
@@ -49,7 +60,7 @@ for corrCoeff = [-1, -0.5, 0, 0.5, 1]
     end
     
     iPhi = 0;
-    for phi = [0.1, 0.5, 1.0]
+    for phi = phiRegime
         
         iPhi = iPhi + 1;
 
@@ -58,8 +69,12 @@ for corrCoeff = [-1, -0.5, 0, 0.5, 1]
             v_def   = R(:,1,iSim) ;
             rn      = R(:,2,iSim);
             iota    = 0.04 .* ones(nVec,1);
-
-            [directRiskFree, gammaRiskFree, directRisky, gammaRisky] = fPowerMonPol(phi, v_def);
+            
+            if strcmp(regime, 'PriceLevel')
+                [directRiskFree, gammaRiskFree, directRisky, gammaRisky] = fPowerMonPol_PLTarg(phi, v_def);
+            elseif strcmp(regime, 'Inflation')
+                [directRiskFree, gammaRiskFree, directRisky, gammaRisky] = fPowerMonPol_InfTarg(phi, v_def);
+            end
             v_riskFree  = directRiskFree .* gammaRiskFree;
             v_Risky     = directRisky .* gammaRisky;
 
@@ -74,7 +89,11 @@ for corrCoeff = [-1, -0.5, 0, 0.5, 1]
             if iSim == nSims
                 pub_GraphDrawZeroAxis(p);
                 set(gca,'FontSize',12); % Scale fontsize of axes
-                ylabel({['$\phi = ' , num2str(phi), '$']; '$E_t \mathcal{D}_{t+1}$'}, 'Interpreter', 'latex');
+                if strcmp(regime, 'PriceLevel')
+                    ylabel({['$\phi = ' , num2str(phi), '$']; '$E_t \mathcal{D}_{t+1}\delta_{t+1}$'}, 'Interpreter', 'latex');
+                elseif strcmp(regime, 'Inflation')
+                    ylabel({['$\phi^{\pi} = ' , num2str(phi), '$']; '$E_t \mathcal{D}_{t+1}\delta_{t+1}$'}, 'Interpreter', 'latex');
+                end
                 
                 if iPhi == 1
                     title("Scatter plot", 'Interpreter', 'latex')
@@ -113,7 +132,7 @@ for corrCoeff = [-1, -0.5, 0, 0.5, 1]
                 ylabel("Difference", 'Interpreter', 'latex');
                 
                 if iPhi == 1
-                    title("$\Upsilon^{Risky}_{t,j+1}\left(1 - E_t \mathcal{D}_{t+j+1}\right) - \Upsilon^{RF}_{t,j+1}$", 'Interpreter', 'latex')
+                    title("$\Upsilon^{Risky}_{t,j+1}\left(1 - E_t \mathcal{D}_{t+j+1}\delta_{t+j+1}\right) - \Upsilon^{RF}_{t,j+1}$", 'Interpreter', 'latex')
                 elseif iPhi == 3
                     xlabel('term period', 'Interpreter', 'latex');
                 end
@@ -130,7 +149,11 @@ for corrCoeff = [-1, -0.5, 0, 0.5, 1]
                 ylabel("%", 'Interpreter', 'latex');
                
                 if iPhi == 1
-                    title("$\Delta p_t$ per term", 'Interpreter', 'latex')
+                    if strcmp(regime, 'PriceLevel')
+                        title("$\Delta p_t$ per term", 'Interpreter', 'latex')
+                    elseif strcmp(regime, 'Inflation')
+                        title("$\Delta \pi_t$ per term", 'Interpreter', 'latex')
+                    end
                 elseif iPhi == 3
                     xlabel('term period', 'Interpreter', 'latex');
                 end
@@ -146,14 +169,15 @@ for corrCoeff = [-1, -0.5, 0, 0.5, 1]
     pub_GraphSetInterpreter(previousInterpreter);
 
     set(gcf, 'Position',  [100, 100, 1000, 800]); % resize figure
-    simGraphName = ['monPolPower_simulation_corr_' num2str(corrCoeff) '.png'];
+    simGraphName = ['monPolPower_simulation_' regime '_corr_' num2str(corrCoeff) '.png'];
     saveas(f,[imagesFolder, simGraphName]);
 
 end
 
 %% Function
 
-function [directRiskFree, gammaRiskFree, directRisky, gammaRisky] = fPowerMonPol(phi, def)
+% Price-level targeting
+function [directRiskFree, gammaRiskFree, directRisky, gammaRisky] = fPowerMonPol_PLTarg(phi, def)
 
 gammaRiskFree   = ones(length(def), 1);
 directRiskFree  = ones(length(def), 1);
@@ -168,6 +192,34 @@ for t = 1:length(def)
     else
         gammaRiskFree(t)    = ((1 + phi)^(-1)) ;
         gammaRisky(t)       = ((1 + (1 - def(t))*phi)^(-1)) ;
+    end
+    
+    directRiskFree(t)    = 1 ;
+    directRisky(t)       = (1-def(t)) ;
+        
+end
+
+riskFree    = directRiskFree .* gammaRiskFree;
+risky       = directRisky .* gammaRisky;
+
+end
+
+% Inflation targeting
+function [directRiskFree, gammaRiskFree, directRisky, gammaRisky] = fPowerMonPol_InfTarg(phi, def)
+
+gammaRiskFree   = ones(length(def), 1);
+directRiskFree  = ones(length(def), 1);
+gammaRisky      = ones(length(def), 1);
+directRisky     = ones(length(def), 1);
+
+for t = 1:length(def)
+ 
+    if t ~= 1
+        gammaRiskFree(t)    = gammaRiskFree(t-1)* ((phi)^(-1)) ;
+        gammaRisky(t)       = (1-def(t)) * gammaRisky(t-1)* (((1 - def(t))*phi)^(-1)) ;
+    else
+        gammaRiskFree(t)    = ((phi)^(-1)) ;
+        gammaRisky(t)       = (((1 - def(t))*phi)^(-1)) ;
     end
     
     directRiskFree(t)    = 1 ;

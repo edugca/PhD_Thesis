@@ -111,8 +111,10 @@ cpiIdx = startsWith(ts_rStar.ts.Properties.VariableNames, 'CPI_').*(~endsWith(ts
 nrIdx = startsWith(ts_rStar.ts.Properties.VariableNames, 'NR_');
 tbIdx = startsWith(ts_rStar.ts.Properties.VariableNames, 'TB_');
 fxavgIdx = startsWith(ts_rStar.ts.Properties.VariableNames, 'FXAVG_');
+
+% Filter data
 dateStart = datetime(2000, 1, 1);
-dateEnd = datetime(2019, 10, 1);
+dateEnd = datetime(2019, 12, 1);
 ts_workData = ts_rStar.ts(dateStart:dateEnd,ts_rStar.ts.Properties.VariableNames(find(cpiIdx + nrIdx + tbIdx + fxavgIdx)));
 
 % Risk premium

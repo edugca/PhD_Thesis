@@ -1157,7 +1157,7 @@ riseConfigVector(ii).conf_defPolTarget = 0.05;
 riseConfigVector(ii).conf_debtLevelGuess = 4.5;
 riseConfigVector(ii).conf_estimateModel = false;
 riseConfigVector(ii).conf_simplifyPolicyRule = true;
-
+% 
 ii = ii + 1;
 riseModelNames{ii} = 'closedWithGovernment';
 riseSetUpNames{ii} = '$\overline{\mathcal{D}} = 5\%$: $r^{RF}_t$';

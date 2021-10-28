@@ -47,4 +47,6 @@ empiricalCorrelations;
 taylorCoeff_infVol;
 
 %% Plot figures 31 to 35
+% In line 29, one can pick the regime: 'PriceLevel' or 'Inflation'
+
 powerOfMonPol_coeff;

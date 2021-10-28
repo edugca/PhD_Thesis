@@ -4,7 +4,7 @@
 
 %% Set-up
 
-isFinal = true;
+isFinal = false;
 
 if isFinal
     imagesFolder = '/Users/Eduardo/Dropbox/PUC-Rio/Tese/Natural Interest Rates/Paper 1/Images/Partial Equilibrium/';
