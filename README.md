@@ -3,6 +3,8 @@
 Welcome to my codes archive. Here, one can find replication material for my papers.
 (under maintenance)
 
+To know more about me and my work, visit my personal page: http://sites.google.com/site/edugca
+
 # Ph.D. Thesis
 
 (2021) Interest, Prices, and Risk
